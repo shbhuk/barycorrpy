@@ -11,8 +11,10 @@ import os
 import sys
 import datetime
 import matplotlib.pyplot as plt
-sys.path.append(os.getcwd()+'\\Box Sync\\BaryCorr\\')
 
+
+append_loc='\\Box Sync\\BaryCorr\\'
+sys.path.append(os.getcwd()+append_loc)
 import utc_tdb
 
 mjdutc=Time(datetime.datetime.utcnow()).mjd
@@ -20,8 +22,8 @@ mjdutc=2458000 - 2400000.5
 
 jdtt=utc_tdb.JDUTC_to_JDTDB(mjdutc+2400000.5)[2]
 
-jason_leap=np.loadtxt(os.getcwd()+'\\Box Sync\\BaryCorr\\'+'leap0')
-iau_1980_nut=np.loadtxt(os.getcwd()+'\\Box Sync\\BaryCorr\\'+'nut_iau1980.txt')
+jason_leap=np.loadtxt(os.getcwd()+append_loc+'leap0')
+iau_1980_nut=np.loadtxt(os.getcwd()+append_loc+'nut_iau1980.txt')
 
 
 def EOPdata(mjd=mjdutc,download=0):
