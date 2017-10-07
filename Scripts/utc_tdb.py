@@ -12,18 +12,16 @@ def JDUTC_to_JDTDB(utctime):
     '''
     Enter utc time as a scalar for JD or as an array in this format [year,month,day,hour,minute,second]
     
+    Does not accept Astropy Time Object or datetime.datetime as input
+    
     
     Output:
-        JDTDB : Julian Date Barycentric Dynamic Time
-        TDB: Barycentric Dynamic Time
-        JDTT: Julian Date Terrestrial Dynamic time
+        JDTDB : Julian Date Barycentric Dynamic Time (Astropy Time object)
+        TDB: Barycentric Dynamic Time (datetime.datetime object)
+        JDTT: Julian Date Terrestrial Dynamic time (Astropy Time object)
     '''
     
-    
-
-    # http://maia.usno.navy.mil/ser7/tai-utc.dat
-    
-    url='https://hpiers.obspm.fr/eoppc/bul/bulc/UTC-TAI.history'
+    #url='https://hpiers.obspm.fr/eoppc/bul/bulc/UTC-TAI.history'
     url='http://maia.usno.navy.mil/ser7/tai-utc.dat'
     location=os.getcwd()+'/Box Sync/BaryCorr/utc_tai.txt'
     
@@ -59,7 +57,7 @@ def JDUTC_to_JDTDB(utctime):
         check_time=(datetime.datetime(utctime[0],utctime[1],utctime[2],utctime[3],utctime[4],utctime[5]))
         JDUTC=Time(check_time).jd
         
-    print 'Converting time='+str(check_time)
+    print '\nConverting UTC time = '+str(check_time) +' \nJDUTC = '+ (str(JDUTC)) 
     
 
     tai_utc=offset[np.max(np.where(JDUTC>=np.array(jd)))]  # Leap second offset value to convert UTC to TAI
@@ -67,19 +65,15 @@ def JDUTC_to_JDTDB(utctime):
     new_tai=check_time+datetime.timedelta(seconds=tai_utc)  # Add offset and convert to TAI
     new_tt=new_tai+datetime.timedelta(seconds=32.184)  # Add 32.184 to convert TAI to TT
 
-
     g=(357.53+0.9856003*( JDUTC - 2451545.0 ))*np.pi/180.  # Earth's mean anomaly
     TDB = new_tt+datetime.timedelta(seconds=0.001658*np.sin(g)+0.000014*np.sin(2*g)) # TT to TDB
-
     JDTT=Time(new_tt).jd
     JDTDB = Time(TDB).jd
 
-    print 'JDTDB = '+str(JDTDB)
-    print 'TDB = '+str(TDB)    
-    print 'UTC = '+str(JDUTC)
-
-
-    
+    #print '\nJDTDB = '+str(JDTDB)
+    #print 'TDB = '+str(TDB)    
+    #print 'JDTT = '+str(JDTT)
+   
     return JDTDB,TDB,JDTT
 
 
