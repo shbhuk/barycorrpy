@@ -11,12 +11,20 @@ import os
 import sys
 import datetime
 import matplotlib.pyplot as plt
+sys.path.append(os.getcwd()+'\\Box Sync\\BaryCorr\\')
+
+import utc_tdb
 
 mjdutc=Time(datetime.datetime.utcnow()).mjd
 mjdutc=2458000 - 2400000.5
 
+jdtt=utc_tdb.JDUTC_to_JDTDB(mjdutc+2400000.5)[2]
 
-def EOPdata(mjd=mjdutc,download=0,location=os.getcwd()+'\\Box Sync\\BaryCorr\\'):
+jason_leap=np.loadtxt(os.getcwd()+'\\Box Sync\\BaryCorr\\'+'leap0')
+iau_1980_nut=np.loadtxt(os.getcwd()+'\\Box Sync\\BaryCorr\\'+'nut_iau1980.txt')
+
+
+def EOPdata(mjd=mjdutc,download=0):
     '''
     Analog of IDL code eopdata.pro
     
@@ -29,15 +37,9 @@ def EOPdata(mjd=mjdutc,download=0,location=os.getcwd()+'\\Box Sync\\BaryCorr\\')
         UT1_UTC
         pmx,pmy,dpsi,deps in arcseconds
     
-    '''   
-    sys.path.append(location)
-    import utc_tdb
+    '''
     
-    jason_leap=np.loadtxt(location+'leap0')
-    iau_1980_nut=np.loadtxt(location+'nut_iau1980.txt')
-    #Convert to JDTT for subsequent parts 
-    jdtt=utc_tdb.JDUTC_to_JDTDB(mjdutc+2400000.5)[2]
-    
+    as2r = np.pi/(3600.*180.)
     
     #iers.IERS_A_README
     if download==0:
@@ -48,7 +50,6 @@ def EOPdata(mjd=mjdutc,download=0,location=os.getcwd()+'\\Box Sync\\BaryCorr\\')
     
     colnames = dat_a.colnames
     
-    # Read columns from IERS Table A
     MJD=dat_a['MJD'].value
     pmx0=np.deg2rad(dat_a['PM_x_A'].value/3600.)
     pmy0=np.deg2rad(dat_a['PM_y_A'].value/3600.)     
@@ -56,28 +57,31 @@ def EOPdata(mjd=mjdutc,download=0,location=os.getcwd()+'\\Box Sync\\BaryCorr\\')
     deps0=np.deg2rad(dat_a['dY_2000A_A'].value/3600.)
     UT1=dat_a['UT1_UTC_A'].value  
        
-    # Check for discontinuities for addition of leap seconds
-    wh=np.append(np.where(np.array([UT1[x]-UT1[x-1] for x in range(1,len(UT1))])>0.8)[0],len(UT1)-1) 
+    wh=np.append(np.where(np.array([UT1[x]-UT1[x-1] for x in range(1,len(UT1))])>0.8)[0],len(UT1)-1) # Check for discontinuities 
     leap0=np.zeros(len(UT1))
     
-    # Add leap seconds
     for i in range(0,len(wh)-1):
         leap0[wh[i]+1:wh[i+1]+1] = (leap0[wh[i]])-np.round(UT1[wh[i]+1]-UT1[wh[i]])
     
-    # Define region for interpolation
+    
     roi=[np.where((MJD<=(mjdutc+5)) & (MJD>=(mjdutc-5)) & (UT1 != 0 ))][0][0] #Region of interest
     
-    MJD1 = MJD[roi]    
+    MJD1 = MJD[roi]
+    
     ii = np.where(MJD1==np.round(mjdutc))[0]
-    jj = roi[ii]       
+    jj = roi[ii]
+       
+    
     UT11=(UT1+leap0)  
     
     #INTERPOLATION
     dt = (mjdutc-MJD1[ii])/(MJD1[ii+1]-MJD1[ii])
 
-    UT1_UTC = UT1[jj]+dt*(UT11[jj+1]-UT11[jj])     
+    UT1_UTC = UT1[jj]+dt*(UT11[jj+1]-UT11[jj])    
+        
     dpsi=np.rad2deg(dpsi0[jj]+dt*(dpsi0[jj+1]-dpsi0[jj]))*3600.
-    deps=np.rad2deg(deps0[jj]+dt*(deps0[jj+1]-deps0[jj]))*3600.      
+    deps=np.rad2deg(deps0[jj]+dt*(deps0[jj+1]-deps0[jj]))*3600.   
+    
     pmx=np.rad2deg(pmx0[jj]+dt*(pmx0[jj+1]-pmx0[jj]))*3600.
     pmy=np.rad2deg(pmy0[jj]+dt*(pmy0[jj+1]-pmy0[jj]))*3600.
     
