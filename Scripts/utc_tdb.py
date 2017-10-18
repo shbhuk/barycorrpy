@@ -10,9 +10,7 @@ import math
 
 def JDUTC_to_JDTDB(utctime):
     '''
-    Enter utc time as a scalar for JD or as an array in this format [year,month,day,hour,minute,second]
-    
-    Does not accept Astropy Time Object or datetime.datetime as input
+    Enter UTC time as Astropy Time Object
     
     
     Output:
@@ -30,7 +28,7 @@ def JDUTC_to_JDTDB(utctime):
     
     file_history=now-utc_tai  # How old is the file?
     
-    if file_history>datetime.timedelta(days=10):
+    if file_history>datetime.timedelta(days=20):
         print 'File more than 10 day old'
         openURL = urllib.URLopener()
         openURL.retrieve(url, location)
@@ -47,17 +45,15 @@ def JDUTC_to_JDTDB(utctime):
         offset.append(float(a[6]))
     f.close()
     
+    if type(utctime)!=astropy.time.core.Time: # Check if it is in Astropy Time Object
+        print "Input Time should be as Astropy Time Object"
+        raise TypeError("Input Time should be as Astropy Time Object")
     
-    if np.size(utctime)==1:    # Check whether date entered is in JD
-        JDUTC=Time(utctime,format='jd')
-        check_time=JDUTC.datetime
-        JDUTC=JDUTC.jd  # Convert to float instead of astropy time structure for comparison with np.where
-
     else:
-        check_time=(datetime.datetime(utctime[0],utctime[1],utctime[2],utctime[3],utctime[4],utctime[5]))
-        JDUTC=Time(check_time).jd
-        
-    print '\nConverting UTC time = '+str(check_time) +' \nJDUTC = '+ (str(JDUTC)) 
+        JDUTC=utctime.jd
+        check_time=utctime.datetime
+      
+    #print '\nConverting UTC time = '+str(check_time) +' \nJDUTC = '+ (str(JDUTC)) 
     
 
     tai_utc=offset[np.max(np.where(JDUTC>=np.array(jd)))]  # Leap second offset value to convert UTC to TAI
@@ -67,14 +63,16 @@ def JDUTC_to_JDTDB(utctime):
 
     g=(357.53+0.9856003*( JDUTC - 2451545.0 ))*np.pi/180.  # Earth's mean anomaly
     TDB = new_tt+datetime.timedelta(seconds=0.001658*np.sin(g)+0.000014*np.sin(2*g)) # TT to TDB
-    JDTT=Time(new_tt).jd
-    JDTDB = Time(TDB).jd
+    JDTT=Time(new_tt,scale='tt',format='datetime')
+    JDTT.format='jd'
+    JDTDB = Time(TDB,scale='tdb',format='datetime')
+    JDTDB.format='jd'
 
     #print '\nJDTDB = '+str(JDTDB)
     #print 'TDB = '+str(TDB)    
     #print 'JDTT = '+str(JDTT)
    
-    return JDTDB,TDB,JDTT
+    return JDTDB,JDTT
 
 
 
