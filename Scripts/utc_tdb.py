@@ -17,7 +17,6 @@ def JDUTC_to_JDTDB(utctime,fpath):
     
     Output:
         JDTDB : Julian Date Barycentric Dynamic Time (Astropy Time object)
-        TDB: Barycentric Dynamic Time (datetime.datetime object)
         JDTT: Julian Date Terrestrial Dynamic time (Astropy Time object)
     '''
     
@@ -28,15 +27,16 @@ def JDUTC_to_JDTDB(utctime,fpath):
     fpath+='utc_tai.txt'
 
     
-    filetime=datetime.datetime.fromtimestamp(os.path.getmtime(fpath))  
-    now=datetime.datetime.now()  # Current time 
-    
-    file_history=now-filetime  # How old is the file?
+
     
     if os.path.isfile(fpath)==False:
         openURL = urllib.URLopener()
         openURL.retrieve(url, fpath)
     else:
+        filetime=datetime.datetime.fromtimestamp(os.path.getmtime(fpath))  
+        now=datetime.datetime.now()  # Current time 
+    
+        file_history=now-filetime  # How old is the file?
         if file_history>datetime.timedelta(days=180):
             print 'File more than 180 days old'
             openURL = urllib.URLopener()
@@ -61,8 +61,7 @@ def JDUTC_to_JDTDB(utctime,fpath):
         JDUTC=utctime.jd
         check_time=utctime.datetime
 
-    tai_utc=offset[np.max(np.where(JDUTC>=np.array(jd)))]  # Leap second offset value to convert UTC to TAI
-    
+    tai_utc=offset[np.max(np.where(JDUTC>=np.array(jd)))] # Leap second offset value to convert UTC to TAI
     new_tai=check_time+datetime.timedelta(seconds=tai_utc)  # Add offset and convert to TAI
     new_tt=new_tai+datetime.timedelta(seconds=32.184)  # Add 32.184 to convert TAI to TT
     g=(357.53+0.9856003*( JDUTC - 2451545.0 ))*np.pi/180.  # Earth's mean anomaly

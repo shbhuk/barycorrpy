@@ -13,15 +13,18 @@ import os
 import sys
 import inspect
 
+
+import PINT_erfautils as PINT
+import utc_tdb
+
 ### Need to install jplephem ### 
 #de430 is 100 MB in size
 
 
-location=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))   
-sys.path.append(location)
+#location=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))   
+#sys.path.append(location)
 from Eastman_applet import bvc
-import PINT_erfautils as PINT
-import utc_tdb
+
 
 '''
 ra, dec - In degrees
@@ -32,12 +35,13 @@ JDUTC - Julian Date in UTC, eg 2450000.0
 
 JDUTC = Time(datetime.datetime.utcnow(),format='datetime',scale='utc')
 utctai_fpath=os.getcwd()+'/Box Sync/BaryCorr/'
+utctai_fpath=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))+'\\'
 #JDUTC=Time(2458000,format='jd',scale='utc')
 
 ra=1.734757638888889*15
 dec=-15.93955572
 
-obsname=''
+obsname='CTIO'
 lat=-30.169283
 longi=-70.806789
 alt=2241.9
@@ -62,21 +66,23 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     INPUTS:
         JDUTC : Astropy Time Object 
         
-        All inputs are SCALARS
+        All subsequent inputs are SCALARS
         
         ra , dec : RA and Dec of object in DEGREES
+        
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
                   If observatory is not included in Astropy, then can enter lat,long,alt.
-        
+                                OR 
         lat : Latitude of observatory in degrees. North (+ve) and South (-ve)
         longi : Longitude of observatory in DEGREES. East (+ve) and West (-ve)
         alt : Altitude of observatory in METERS
+        
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.0
         pmra : Proper motion in RA, in MAS/YEAR. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
         pmdec : Proper motion in Dec, in MAS/YEAR. Default is 0.0
         px : Parallax of target in MAS. Default is 0.0
         rv : Radial Velocity of Target in M/S. Default is 0.0
-        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum)
+        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.0
         ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430. 
                     For first use Astropy will involve the Ephemeris (DE430 ~100MB)
         
@@ -87,23 +93,9 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
         utctai_fpath : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'
          
     OUTPUTS:
-        The barycenter-corrected RV as defined in Wright & Eastman, 2014.
-    
-    
-    
-    
+        The barycenter-corrected RV (M/S) as defined in Wright & Eastman, 2014.
     
     '''
-    
-    
-    
-    
-    
-    
-
-    
-    
-    
     
     AU=const.astronomical_unit # 1 AU in meters
     c=const.c # Speed of light in m/s
@@ -111,7 +103,6 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     year = 365.25*3600*24 # 1 year in seconds
     kmstoauyr = year/(1000*AU)
     
-    GMsun=u.M_sun*const.G # G*M-sun   
     M_moon=73476730924573500000000 # Mass of the Moon in kg
     M_earth=u.M_earth.value
     M_sun=u.M_sun.value
@@ -119,15 +110,17 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     # Sun,  Mercury , Venus, Earth, Mars, Jupiter, Saturn , Uranus , Neptune, Moon
     GM=[const.G*x for x in [M_sun,0.3301e24,4.867e24,M_earth,0.6417e24,u.M_jup.value,568.5e24,86.82e24,102.4e24,M_moon]]
     
-    
     # Convert times to obtain TDB and TT 
     JDTDB,JDTT=utc_tdb.JDUTC_to_JDTDB(JDUTC,fpath=utctai_fpath)
     
     
-    #### OBSERVATORY EUCLIDEAN COORDINATES #####       
+    ##### OBSERVATORY EUCLIDEAN COORDINATES #####       
     
     if len(obsname)!=0:
         loc=EarthLocation.of_site(obsname)
+        lat=loc.lat.value
+        longi=loc.lon.value
+        alt=loc.height.value
     else:       
         loc=EarthLocation.from_geodetic(longi,lat,height=alt)
     R_ITRF=loc.value
@@ -148,7 +141,7 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     # Relativistic Addition of Velocities
     v_obs=(v_eci+v_geo)/(1.+v_eci*v_geo/c**2) # m/s
     beta_earth=v_obs/c
-    
+   
     
     ##### Convert Star RA DEC to R0hat vector #####
     
@@ -160,7 +153,8 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     north = np.cross(r0hat,east)
     mu =  ((pmra*east+pmdec*north)/pctoau/1000) # Divided by 1000 since the Proper motion is in milli-arcseconds.
     
-    #### Stellar position at each time ####
+    
+    ##### Stellar position at each time #####
     
     epoch0 = 2000.0+(epoch-2451545.0)/365.25
     yearnow = 2000.0+(JDTDB.jd-2451545.0)/365.25
@@ -186,7 +180,7 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
         zlighttravel = 0.0
     
     
-    #### Calculate Gravitaional Redshift due to Solar system bodies ####
+    ##### Calculate Gravitaional Redshift due to Solar system bodies #####
     
     bodies=solar_system_ephemeris.bodies
     
@@ -210,13 +204,12 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
         zshapiro+= -2.0*GM[i]*a/((c*c)*(Xmag*(1+np.dot(Xhat,rhohat))))
         
         if Xmag!=0.0:
-            Sum_GR+=GM[i]/Xmag  # (m/s)^2
-            
+            Sum_GR+=GM[i]/Xmag  # (m/s)^2    
         
     zgravity=1.0/(1+Sum_GR/(c*c))-1
     
     
-    #### Determine the Barycentric RV correction (eq 28) ####
+    ##### Determine the Barycentric RV correction (eq 28) #####
     
     gamma_earth=1./math.sqrt(1.-sum(beta_earth**2))
     
@@ -224,7 +217,7 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     zb = -1.0 - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth,rhohat))*(1+np.dot(r0hat,beta_star))/((1+np.dot(beta_star,rhohat))*(1+zgravity)) # Eq 28
     v_final=c*((1.0+zb)*(1.0+zmeas)-1.0)
 
-    #### Call Eastman applet to compare ####
+    ##### Call Eastman applet to compare #####
     res = bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch)
     
     return v_final,res
