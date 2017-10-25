@@ -1,4 +1,4 @@
-# BaryCorrPy
+# barycorrpy
 
 Python version of Barycorr
 
