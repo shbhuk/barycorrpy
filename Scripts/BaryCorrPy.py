@@ -2,7 +2,7 @@ from __future__ import division
 #import de423    #https://pypi.python.org/pypi/jplephem
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import solar_system_ephemeris
-from astropy.coordinates import get_body_barycentric_posvel
+from astropy.coordinates import get_body_barycentric_posvel,get_body_barycentric
 from astropy.time import Time
 import datetime
 import math
@@ -13,7 +13,7 @@ import os
 import sys
 import inspect
 
-
+from read_HIP import find_hip
 import PINT_erfautils as PINT
 import utc_tdb
 
@@ -34,14 +34,15 @@ JDUTC - Julian Date in UTC, eg 2450000.0
 #For Tau Ceti
 
 JDUTC = Time(datetime.datetime.utcnow(),format='datetime',scale='utc')
-utctai_fpath=os.getcwd()+'/Box Sync/BaryCorr/'
-utctai_fpath=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))+'\\'
+#leap_dir=os.getcwd()+'/Box Sync/BaryCorr/barycorrpy/'
+leap_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))+'\\'
 #JDUTC=Time(2458000,format='jd',scale='utc')
 
 ra=1.734757638888889*15
-dec=-15.93955572
+ra=26.0213645867
+dec=-15.9395557246
 
-obsname='CTIO'
+obsname=''
 lat=-30.169283
 longi=-70.806789
 alt=2241.9
@@ -57,18 +58,44 @@ zmeas=0.0
 ephem=['de432s','de430','https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp','https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
 ephemeris='https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp'
 #ephemeris='de430'
+hip_id=8102
 
 
-def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',utctai_fpath=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) ) :
+def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), leap_update = True):
     '''
-    Barycentric Velocity Correction at the 1 cm/s level, as defined in Wright & Eastman, 2014.
+    INPUTS:
+        See BCPy()
+        JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times.
+        hip_id : Hipparcos Catalog ID. (Integer) 
+                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified. Epoch will be taken to be Catalogue Epoch or J1991.25
+    
+    
+    '''
+    
+    if (type(hip_id) == int) and (hip_id > 0):
+        _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
+        print 'Reading from Hipparcos Catalogue'
+    
+    vel=[]
+    for i in range(0,np.size(JDUTC)):               
+        vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+
+    return vel
+
+
+
+
+
+def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))),leap_update = True ) :
+    '''
+    Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
     INPUTS:
         JDUTC : Astropy Time Object 
         
         All subsequent inputs are SCALARS
         
-        ra , dec : RA and Dec of object in DEGREES
+        ra , dec : RA and Dec of star in DEGREES
         
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
                   If observatory is not included in Astropy, then can enter lat,long,alt.
@@ -90,7 +117,9 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         
-        utctai_fpath : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'
+        leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
+                    If False, then will just give a warning message. Default is True.
          
     OUTPUTS:
         The barycenter-corrected RV (M/S) as defined in Wright & Eastman, 2014.
@@ -111,18 +140,19 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     GM=[const.G*x for x in [M_sun,0.3301e24,4.867e24,M_earth,0.6417e24,u.M_jup.value,568.5e24,86.82e24,102.4e24,M_moon]]
     
     # Convert times to obtain TDB and TT 
-    JDTDB,JDTT=utc_tdb.JDUTC_to_JDTDB(JDUTC,fpath=utctai_fpath)
-    
+    JDTDB,JDTT,warning=utc_tdb.JDUTC_to_JDTDB(JDUTC,fpath=leap_dir,leap_update=leap_update)
     
     ##### OBSERVATORY EUCLIDEAN COORDINATES #####       
     
-    if len(obsname)!=0:
-        loc=EarthLocation.of_site(obsname)
-        lat=loc.lat.value
-        longi=loc.lon.value
-        alt=loc.height.value
-    else:       
+    
+    if len(obsname)==0:
         loc=EarthLocation.from_geodetic(longi,lat,height=alt)
+    else: 
+        loc=EarthLocation.of_site(obsname)
+        lat=loc.lat.value  # Only need for applet. Can remove ########3
+        longi=loc.lon.value
+        alt=loc.height.value      
+
     R_ITRF=loc.value
     
     ##### NUTATION , PRECESSION , ETC. #####
@@ -134,7 +164,7 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     
     ##### EPHEMERIDES #####
             
-    earth_geo=get_body_barycentric_posvel('earth',JDTDB,ephemeris=ephemeris)
+    earth_geo=get_body_barycentric_posvel('earth',JDTDB,ephemeris=ephemeris) # meters
     r_obs=r_eci+earth_geo[0].xyz.value*1000. # meters
     v_geo=earth_geo[1].xyz.value*1000./(86400.)  # meters/second
     
@@ -179,6 +209,7 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
         beta_star=[0.0,0.0,0.0]
         zlighttravel = 0.0
     
+
     
     ##### Calculate Gravitaional Redshift due to Solar system bodies #####
     
@@ -189,10 +220,10 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     Sum_GR=0.0
     zshapiro=0.0
     
-    for i in range(0,len(ss_bodies)-3):
-        jplephem=get_body_barycentric_posvel(ss_bodies[i],JDTDB,ephemeris=ephemeris)
-        pos_obj=jplephem[0].xyz.value*1000. # meters
-        vel_obj=jplephem[1].xyz.value*1000./(86400.) # meters/second
+    for i in range(0,len(ss_bodies)):
+        jplephem=get_body_barycentric(ss_bodies[i],JDTDB,ephemeris=ephemeris)
+        pos_obj=jplephem.xyz.value*1000. # meters
+        #vel_obj=jplephem[1].xyz.value*1000./(86400.) # meters/second
         
         # Vecgtor from object barycenter to Observatory
         X=np.array(r_obs-pos_obj)
@@ -213,17 +244,20 @@ def BCPy(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,e
     
     gamma_earth=1./math.sqrt(1.-sum(beta_earth**2))
     
-
     zb = -1.0 - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth,rhohat))*(1+np.dot(r0hat,beta_star))/((1+np.dot(beta_star,rhohat))*(1+zgravity)) # Eq 28
     v_final=c*((1.0+zb)*(1.0+zmeas)-1.0)
-
+    
     ##### Call Eastman applet to compare #####
     res = bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch)
     
-    return v_final,res
-
-a=BCPy(ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,utctai_fpath=utctai_fpath)
-
+    return v_final,res,warning
+    
+zb_bc=np.loadtxt(os.getcwd()+'/Box Sync/BaryCorr/Acceleration_check/zb.txt')
+jds=Time(zb_bc[:,0],format='mjd')
+epoch = 2448349.06250
+a=BCPy(JDUTC=jds[0],ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_dir=leap_dir,leap_update=True)
+print a
+#print '%30.20f'%a[2][0].x.value
 
  
     

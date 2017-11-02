@@ -7,6 +7,7 @@ setup(name='barycorrpy',
       author='Shubham Kanodia',
       author_email='shbhuk@gmail.com',
       install_requires=['astropy','jplephem'],
-      classifiers=['Topic :: Scientific/Engineering :: Astronomy']
+      classifiers=['Topic :: Scientific/Engineering :: Astronomy'],
+      include_package_data=True
       )
       
