@@ -71,14 +71,6 @@ def main():
         pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_update=True)
     print a
 
-    
-    
-    
-    
-
-
-
-
 
 def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,
     pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):
@@ -101,8 +93,6 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
         vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
 
     return vel
-
-
 
 
 
@@ -273,6 +263,4 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545
     
     return v_final,res,warning
     
-
-
 
