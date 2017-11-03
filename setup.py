@@ -14,6 +14,7 @@ setup(name='barycorrpy',
       author='Shubham Kanodia',
       author_email='shbhuk@gmail.com',
       install_requires=['astropy','jplephem','numpy','scipy'],
+      packages=['barycorrpy'],
       classifiers=['Topic :: Scientific/Engineering :: Astronomy'],
       keywords='Barycentric Correction Astronomy Spectroscopy Radial Velocity',
       include_package_data=True
