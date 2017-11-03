@@ -15,6 +15,6 @@ This is the Python version of Jason Eastman and Jason Wright's IDL code [BaryCor
 
  #### OR 
  
- 1. pip install git+https://github.com/shbhuk/barycorrpy.git
+ 1. `pip install git+https://github.com/shbhuk/barycorrpy.git`
  
  
