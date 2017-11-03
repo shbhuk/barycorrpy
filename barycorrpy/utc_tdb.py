@@ -61,7 +61,7 @@ def leap_manage(utctime,fpath,leap_update):
     
     
     INPUT: 
-        Enter UTC time as Astropy Time Object
+        Enter UTC time as Astropy Time Object. In UTC Scale.
         
         fpath : Path to where the file would be saved.
         leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.
@@ -131,7 +131,7 @@ def JDUTC_to_JDTDB(utctime,fpath,leap_update):
     '''
     Convert JDUTC to JDTDB
     
-    utctime : Enter UTC time as Astropy Time Object
+    utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
     
     fpath : Path to where the file would be saved.
     leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.

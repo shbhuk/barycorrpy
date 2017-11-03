@@ -35,7 +35,7 @@ JDUTC - Julian Date in UTC, eg 2450000.0
 
 JDUTC = Time(datetime.datetime.utcnow(),format='datetime',scale='utc')
 #leap_dir=os.getcwd()+'/Box Sync/BaryCorr/barycorrpy/'
-leap_dir=os.path.dirname(__file__)
+
 #JDUTC=Time(2458000,format='jd',scale='utc')
 
 
@@ -49,6 +49,7 @@ def main():
     lat=-30.169283
     longi=-70.806789
     alt=2241.9
+    leap_dir=os.path.dirname(__file__)
     
     epoch = 2451545.0 # Default is J2000 - Julian Day January 1st 2000, 12 noon
     
@@ -62,12 +63,12 @@ def main():
     ephemeris='https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp'
     #ephemeris='de430'
     hip_id=8102
-    zb_bc=np.loadtxt(os.getcwd()+'/Box Sync/BaryCorr/Acceleration_check/zb.txt')
-    jds=Time(zb_bc[:,0],format='mjd')
-    epoch = 2448349.06250
+    #zb_bc=np.loadtxt(os.getcwd()+'/Box Sync/BaryCorr/Acceleration_check/zb.txt')
+    #jds=Time(zb_bc[:,0],format='mjd')
+    #epoch = 2448349.06250
     
-    a=BCPy(JDUTC=jds[0],ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
-        pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_dir=leap_dir,leap_update=True)
+    a=BCPy(JDUTC=Time(datetime.datetime.now(),format='datetime'),ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
+        pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_update=True)
     print a
 
     
@@ -84,7 +85,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
     '''
     INPUTS:
         See BCPy()
-        JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times.
+        JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale. 
         hip_id : Hipparcos Catalog ID. (Integer) 
                  If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified. Epoch will be taken to be Catalogue Epoch or J1991.25
     
@@ -111,7 +112,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
     INPUTS:
-        JDUTC : Astropy Time Object 
+        JDUTC : Astropy Time Object . In UTC Scale.
         
         All subsequent inputs are SCALARS
         
