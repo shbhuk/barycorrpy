@@ -11,7 +11,7 @@ import astropy.constants as u
 import numpy as np
 import os
 import sys
-import inspect
+
 
 from read_HIP import find_hip
 import PINT_erfautils as PINT
@@ -35,7 +35,7 @@ JDUTC - Julian Date in UTC, eg 2450000.0
 
 JDUTC = Time(datetime.datetime.utcnow(),format='datetime',scale='utc')
 #leap_dir=os.getcwd()+'/Box Sync/BaryCorr/barycorrpy/'
-leap_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))+'\\'
+leap_dir=os.path.dirname(__file__)
 #JDUTC=Time(2458000,format='jd',scale='utc')
 
 ra=1.734757638888889*15
@@ -61,7 +61,7 @@ ephemeris='https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_
 hip_id=8102
 
 
-def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), leap_update = True):
+def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):
     '''
     INPUTS:
         See BCPy()
@@ -86,7 +86,8 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
 
 
 
-def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))),leap_update = True ) :
+def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__),leap_update = True ) :
+    print leap_dir
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
@@ -259,6 +260,3 @@ a=BCPy(JDUTC=jds[0],ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pm
 print a
 #print '%30.20f'%a[2][0].x.value
 
- 
-    
-    
