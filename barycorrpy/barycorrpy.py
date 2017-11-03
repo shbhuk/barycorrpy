@@ -13,9 +13,9 @@ import os
 import sys
 
 
-from read_HIP import find_hip
-import PINT_erfautils as PINT
-import utc_tdb
+from .read_HIP import find_hip
+from . import PINT_erfautils as PINT
+from . import utc_tdb
 
 ### Need to install jplephem ### 
 #de430 is 100 MB in size
