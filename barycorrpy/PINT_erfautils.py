@@ -1,8 +1,5 @@
-#https://github.com/nanograv/PINT/blob/master/pint/erfautils.py
-
-# NEED TO CHECK LICENSING
-
-
+# This is taken from PINT - https://github.com/nanograv/PINT/blob/master/pint/erfautils.py. For licensing see license file on PINT github repository. 
+# https://github.com/nanograv/PINT/blob/ea1c3b9f71c06a73d6613d647770b99924f7c9bf/LICENSE.md
 
 import numpy as np
 import astropy.units as un
@@ -18,9 +15,8 @@ import datetime
 
 from astropy.utils.iers import IERS_A, IERS_A_URL, IERS_B, IERS_B_URL, IERS
 from astropy.utils.data import download_file
-# iers_a_file = download_file(IERS_A_URL, cache=True)
+
 iers_b_file = download_file(IERS_B_URL, cache=True)
-# iers_a = IERS_A.open(iers_a_file)
 iers_b = IERS_B.open(iers_b_file)
 IERS.iers_table = iers_b
 iers_tab = IERS.iers_table
@@ -37,11 +33,6 @@ OM = 1.00273781191135448 * 2.0 * np.pi / SECS_PER_DAY
 # arcsec to radians
 asec2rad = 4.84813681109536e-06
 
-lat=31.9599
-longi=-111.5997
-alt=2096
-loc=EarthLocation.from_geodetic(longi,lat,height=alt)
-t=Time(2458000,format='jd')
 
 def gcrs_posvel_from_itrf(loc, toas, obsname='obs'):
     """Return a list of PosVel instances for the observatory at the TOA times.
@@ -81,9 +72,6 @@ def gcrs_posvel_from_itrf(loc, toas, obsname='obs'):
     # Get x, y coords of Celestial Intermediate Pole and CIO locator s
     X, Y, S = erfa.xys00a(*tts)
 
-    # Get dX and dY from IERS A in arcsec and convert to radians
-    #dX = np.interp(mjds, iers_tab['MJD'], iers_tab['dX_2000A_B']) * asec2rad
-    #dY = np.interp(mjds, iers_tab['MJD'], iers_tab['dY_2000A_B']) * asec2rad
     # Get dX and dY from IERS B in arcsec and convert to radians
     dX = np.interp(mjds, iers_tab['MJD'], iers_tab['dX_2000A']) * asec2rad
     dY = np.interp(mjds, iers_tab['MJD'], iers_tab['dY_2000A']) * asec2rad
@@ -127,9 +115,3 @@ def gcrs_posvel_from_itrf(loc, toas, obsname='obs'):
     return poss,vels
 #    return utils.PosVel(poss.T * un.m, vels.T * un.m / un.s, obj=obsname, origin="earth")
 
-
-# This seems to be never used!  It also has no docstring!
-# def astropy_gcrs_posvel_from_itrf(loc, toas, obsname='obs'):
-#     t = Time(toas['tdbld'], scale='tdb', format='mjd')
-#     pos, vel = loc.get_gcrs_posvel(t)
-#     return utils.PosVel(pos, vel, obj=obsname, origin="earth")
