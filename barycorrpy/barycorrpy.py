@@ -67,7 +67,7 @@ def main():
     #jds=Time(zb_bc[:,0],format='mjd')
     #epoch = 2448349.06250
     
-    a=BCPy(JDUTC=Time(datetime.datetime.now(),format='datetime'),ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
+    a=call_BCPy(JDUTC=Time([datetime.datetime.utcnow(),datetime.datetime.now()],format='datetime'),ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
         pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_update=True)
     print a
 
@@ -87,6 +87,11 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
     if (type(hip_id) == int) and (hip_id > 0):
         _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
         print 'Reading from Hipparcos Catalogue'
+    
+    if len(obsname)!=0:
+        print 'Taking observatory coordinates from Astropy Observatory database. Check precision.'
+        
+    
     
     vel=[]
     for i in range(0,np.size(JDUTC)):               
