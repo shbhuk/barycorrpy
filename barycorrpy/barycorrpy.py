@@ -80,6 +80,12 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
         JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale. 
         hip_id : Hipparcos Catalog ID. (Integer) 
                  If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified. Epoch will be taken to be Catalogue Epoch or J1991.25
+        obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
+                  If observatory is not included in Astropy, then can enter lat,long,alt.
+                                OR 
+        lat : Latitude of observatory in degrees. North (+ve) and South (-ve)
+        longi : Longitude of observatory in DEGREES. East (+ve) and West (-ve)
+        alt : Altitude of observatory in METERS
     
     
     '''
@@ -87,21 +93,29 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
     if (type(hip_id) == int) and (hip_id > 0):
         _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
         print 'Reading from Hipparcos Catalogue'
-    
-    if len(obsname)!=0:
+        
+        
+        
+    if len(obsname)==0:
+        loc=EarthLocation.from_geodetic(longi,lat,height=alt)
+    else: 
         print 'Taking observatory coordinates from Astropy Observatory database. Check precision.'
+        loc=EarthLocation.of_site(obsname)
+        lat=loc.lat.value  # Only need for applet. Can remove ########FIND ME
+        longi=loc.lon.value
+        alt=loc.height.value 
         
     
     
     vel=[]
     for i in range(0,np.size(JDUTC)):               
-        vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+        vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
 
     return vel
 
 
 
-def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,
+def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
     pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__),leap_update = True ) :
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
@@ -113,12 +127,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545
         
         ra , dec : RA and Dec of star in DEGREES
         
-        obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
-                  If observatory is not included in Astropy, then can enter lat,long,alt.
-                                OR 
-        lat : Latitude of observatory in degrees. North (+ve) and South (-ve)
-        longi : Longitude of observatory in DEGREES. East (+ve) and West (-ve)
-        alt : Altitude of observatory in METERS
+        loc: Earth Location of Observatory as Astropy Object
         
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.0
         pmra : Proper motion in RA, in MAS/YEAR. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
@@ -161,15 +170,8 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545
     ##### OBSERVATORY EUCLIDEAN COORDINATES #####       
     
     
-    if len(obsname)==0:
-        loc=EarthLocation.from_geodetic(longi,lat,height=alt)
-    else: 
-        loc=EarthLocation.of_site(obsname)
-        lat=loc.lat.value  # Only need for applet. Can remove ########3
-        longi=loc.lon.value
-        alt=loc.height.value      
-
-    R_ITRF=loc.value
+    ## FIND ME ## REMOVE LAT , LONG # Delete applet package
+    
     
     ##### NUTATION , PRECESSION , ETC. #####
     
