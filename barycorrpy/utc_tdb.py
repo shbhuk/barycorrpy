@@ -83,8 +83,12 @@ def leap_manage(utctime,fpath,leap_update):
        
     # If log file does not exist, then download the leap second file and create a log file
     if (os.path.isfile(log_fpath)==False or os.path.isfile(ls_fpath)==False):
-        leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
-        warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+        if leap_update==True:
+            leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
+            warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+        else:
+            warning+=['LEAP SECOND FILE / LOG FILE DOES NOT EXIST. Please set leap_update = True to update file. Corrections may not be accurate ']
+            return 0,warning
 
 
     # If file exists then check if need to update

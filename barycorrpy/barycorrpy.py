@@ -72,21 +72,42 @@ def main():
     print a
 
 
-def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,epoch=2451545.0,pmra=0.0,
-    pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):
+def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
+    pmdec=0.0,px=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):
     '''
-    INPUTS:
-        See BCPy()
+    Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
+    Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values)
+    
+    INPUTS:      
         JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale. 
-        hip_id : Hipparcos Catalog ID. (Integer) 
-                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified. Epoch will be taken to be Catalogue Epoch or J1991.25
+        hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
+                If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
+                                OR
+        ra , dec : RA and Dec of star in DEGREES         
+        epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.0
+        pmra : Proper motion in RA, in MAS/YEAR. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
+        pmdec : Proper motion in Dec, in MAS/YEAR. Default is 0.0
+        px : Parallax of target in MAS. Default is 0.0
+                                
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
-                  If observatory is not included in Astropy, then can enter lat,long,alt.
+                  If obsname is not used, then can enter lat,long,alt.
                                 OR 
         lat : Latitude of observatory in degrees. North (+ve) and South (-ve)
         longi : Longitude of observatory in DEGREES. East (+ve) and West (-ve)
         alt : Altitude of observatory in METERS
+        rv : Radial Velocity of Target in M/S. Default is 0.0
+        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.0
+        ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430. 
+                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB)   
+        ephem=['de432s','de430',
+                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
+                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']      
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'
+        leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
+                    If False, then will just give a warning message. Default is True.
     
+    OUTPUTS:
+        The barycenter-corrected RV (M/S) as defined in Wright & Eastman, 2014.
     
     '''
     
@@ -108,9 +129,12 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0
     
     
     vel=[]
-    for i in range(0,np.size(JDUTC)):               
-        vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
-
+    if np.size(JDUTC)>1:
+        for i in range(0,np.size(JDUTC)):               
+            vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+    else:
+        vel.append(BCPy(JDUTC=JDUTC,ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+        
     return vel
 
 
@@ -120,34 +144,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
-    INPUTS:
-        JDUTC : Astropy Time Object . In UTC Scale.
-        
-        All subsequent inputs are SCALARS
-        
-        ra , dec : RA and Dec of star in DEGREES
-        
-        loc: Earth Location of Observatory as Astropy Object
-        
-        epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.0
-        pmra : Proper motion in RA, in MAS/YEAR. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
-        pmdec : Proper motion in Dec, in MAS/YEAR. Default is 0.0
-        px : Parallax of target in MAS. Default is 0.0
-        rv : Radial Velocity of Target in M/S. Default is 0.0
-        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.0
-        ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430. 
-                    For first use Astropy will involve the Ephemeris (DE430 ~100MB)
-        
-        ephem=['de432s','de430',
-                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
-                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
-        
-        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'
-        leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                    If False, then will just give a warning message. Default is True.
-         
-    OUTPUTS:
-        The barycenter-corrected RV (M/S) as defined in Wright & Eastman, 2014.
+    See call_BCPy() for parameter description
     
     '''
     
@@ -241,9 +238,8 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     for i in range(0,len(ss_bodies)):
         jplephem=get_body_barycentric(ss_bodies[i],JDTDB,ephemeris=ephemeris)
         pos_obj=jplephem.xyz.value*1000. # meters
-        #vel_obj=jplephem[1].xyz.value*1000./(86400.) # meters/second
         
-        # Vecgtor from object barycenter to Observatory
+        # Vector from object barycenter to Observatory
         X=np.array(r_obs-pos_obj)
         Xmag=math.sqrt(sum(X*X)) # In meters
         Xhat=X/(Xmag) # Unitless
@@ -265,7 +261,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     zb = -1.0 - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth,rhohat))*(1+np.dot(r0hat,beta_star))/((1+np.dot(beta_star,rhohat))*(1+zgravity)) # Eq 28
     v_final=c*((1.0+zb)*(1.0+zmeas)-1.0)
     
-    ##### Call Eastman applet to compare #####
+    ##### Call Eastman applet to compare #####FIND ME
     res = bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch)
     
     return v_final,res,warning
