@@ -16,8 +16,7 @@ Linux/Unix systems -
 2. In the repository directory 
 `sudo python setup.py install`
 
- #### FOR WINDOWS
- 
+Windows - 
  1. Install Git - [Git for Windows](https://git-for-windows.github.io/)
  
  2. `pip install git+https://github.com/shbhuk/barycorrpy.git`
