@@ -18,7 +18,8 @@ Linux/Unix systems -
 
 Windows - 
  1. Install Git - [Git for Windows](https://git-for-windows.github.io/)
- 
- 2. `pip install git+https://github.com/shbhuk/barycorrpy.git`
+ 2. Install pip - [pip for Windows](https://pip.pypa.io/en/stable/installing/)
+ 3. In cmd or git cmd - 
+  `pip install git+https://github.com/shbhuk/barycorrpy.git`
  
  
