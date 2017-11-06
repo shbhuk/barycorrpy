@@ -9,14 +9,17 @@ The script
 
 
 ### Steps to Install from GitHub 
+Linux/Unix systems - 
 1. In the terminal - 
 `git clone https://github.com/shbhuk/barycorrpy`
 
 2. In the repository directory 
 `sudo python setup.py install`
 
- #### OR 
+ #### FOR WINDOWS
  
- 1. `pip install git+https://github.com/shbhuk/barycorrpy.git`
+ 1. Install Git - [Git for Windows](https://git-for-windows.github.io/)
+ 
+ 2. `pip install git+https://github.com/shbhuk/barycorrpy.git`
  
  
