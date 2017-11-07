@@ -191,7 +191,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     ##### Convert Star RA DEC to R0hat vector #####
     
     r0hat=np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.),math.sin(ra*np.pi/180.)*math.cos(dec*np.pi/180.),math.sin(dec*np.pi/180.)])
-    
+    # Eq 14 to 17
     up = [0.0,0.0,1.0] 
     east = np.cross(up,r0hat)
     east = east/math.sqrt(sum(east*east))
@@ -246,7 +246,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
         
         # Add Shapiro Delay
         a=np.dot((rhohat-np.dot(Xhat,rhohat)*Xhat),beta_earth)
-        zshapiro+= -2.0*GM[i]*a/((c*c)*(Xmag*(1+np.dot(Xhat,rhohat))))
+        zshapiro+= -2.0*GM[i]*a/((c*c)*(Xmag*(1+np.dot(Xhat,rhohat))))   # Eq 27
         
         if Xmag!=0.0:
             Sum_GR+=GM[i]/Xmag  # (m/s)^2    
