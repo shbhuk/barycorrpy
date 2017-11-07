@@ -87,7 +87,7 @@ def leap_manage(utctime,fpath,leap_update):
             leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
             warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
         else:
-            warning+=['LEAP SECOND FILE / LOG FILE DOES NOT EXIST. Please set leap_update = True to update file. Corrections may not be accurate ']
+            warning+=['ERROR : LEAP SECOND FILE / LOG FILE DOES NOT EXIST. Please set leap_update = True to update file. Corrections may not be accurate ']
             return 0,warning
 
 
@@ -103,12 +103,12 @@ def leap_manage(utctime,fpath,leap_update):
         
         # Check if need to update file
         if staleness_check(file_time,now)==1:
-            warning+=['Need to update leap second file. Corrections may not be accurate to 1 cm/s with old file']
+            warning+=['WARNING : Need to update leap second file. Corrections may not be accurate to 1 cm/s with old file']
             if leap_update==True:
                 leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)  
                 warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
                     
-            else: warning+=["Leap second file should be updated. Set leap_update = True to download file"]
+            else: warning+=["ERROR : Leap second file should be updated. Set leap_update = True to download file"]
 
     f=open(ls_fpath,'r')
     jd=[]
@@ -148,13 +148,18 @@ def JDUTC_to_JDTDB(utctime,fpath,leap_update):
         
         
         
+
     '''
+    JDUTC=utctime.jd
+    if JDUTC<2441317.5 : 
+        return JDUTC.tdb,JDUTC.tt,['WARNING : Precise leap second history is not maintained here for before 1972. Defaulting to Astropy. Corrections maybe inaccurate']
 
     # Call function to check leap second file and find offset between UTC and TAI. 
     tai_utc,warning=leap_manage(utctime=utctime,fpath=fpath,leap_update=leap_update)
     
-    JDUTC=utctime.jd
-    if JDUTC<2441317.5 : warning+=['Precise leap second history is not maintained for before 1972. Corrections maybe inaccurate']
+    if tai_utc==0:
+        return JDUTC.tdb,JDUTC.tt,warning+['ERROR : Unable to maintain leap second file. Defaulting to AstroPy version']        
+
     check_time=utctime.datetime
     
     
