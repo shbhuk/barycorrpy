@@ -1,3 +1,3 @@
-include leap_sec.txt
-inlcude leapsec_log.txt
-include hip2.dat
+include barycorrpy/leap_sec.txt
+inlcude barycorrpy/leapsec_log.txt
+include barycorrpy/hip2.dat
