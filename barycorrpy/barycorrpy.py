@@ -21,7 +21,7 @@ from . import utc_tdb
 ### Need to install jplephem ### 
 #de430 is 100 MB in size
 
-from Eastman_applet import bvc
+from .Eastman_applet import bvc
 
 
 
