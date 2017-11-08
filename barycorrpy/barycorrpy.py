@@ -20,23 +20,8 @@ from . import utc_tdb
 ### Need to install jplephem ### 
 #de430 is 100 MB in size
 
-
-#location=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))   
-#sys.path.append(location)
 from Eastman_applet import bvc
 
-
-'''
-ra, dec - In degrees
-JDUTC - Julian Date in UTC, eg 2450000.0
-
-'''
-#For Tau Ceti
-
-JDUTC = Time(datetime.datetime.utcnow(),format='datetime',scale='utc')
-#leap_dir=os.getcwd()+'/Box Sync/BaryCorr/barycorrpy/'
-
-#JDUTC=Time(2458000,format='jd',scale='utc')
 
 
 
