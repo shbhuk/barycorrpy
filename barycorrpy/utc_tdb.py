@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import urllib
 import astropy
 import os
@@ -121,7 +122,7 @@ def leap_manage(utctime,fpath,leap_update):
     f.close()
     
     if type(utctime)!=astropy.time.core.Time: # Check if it is in Astropy Time Object
-        print "Input Time should be as Astropy Time Object"
+        print("Input Time should be as Astropy Time Object")
         raise TypeError("Input Time should be as Astropy Time Object")
     else:
         JDUTC=utctime.jd

@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 #import de423    #https://pypi.python.org/pypi/jplephem
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import solar_system_ephemeris
@@ -54,7 +55,7 @@ def main():
     
     a=call_BCPy(JDUTC=Time([datetime.datetime.utcnow(),datetime.datetime.now()],format='datetime'),ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
         pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_update=True)
-    print a
+    print(a)
 
 
 def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
@@ -98,14 +99,14 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     
     if (type(hip_id) == int) and (hip_id > 0):
         _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
-        print 'Reading from Hipparcos Catalogue'
+        print('Reading from Hipparcos Catalogue')
         
         
         
     if len(obsname)==0:
         loc=EarthLocation.from_geodetic(longi,lat,height=alt)
     else: 
-        print 'Taking observatory coordinates from Astropy Observatory database. Check precision.'
+        print('Taking observatory coordinates from Astropy Observatory database. Check precision.')
         loc=EarthLocation.of_site(obsname)
         lat=loc.lat.value  # Only need for applet. Can remove ########FIND ME
         longi=loc.lon.value
