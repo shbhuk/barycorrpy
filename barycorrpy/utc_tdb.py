@@ -132,7 +132,7 @@ def leap_manage(utctime,fpath,leap_update):
     return tai_utc  , warning
  
 
-def JDUTC_to_JDTDB(utctime,fpath=os.path.dirname(__file__),leap_update):
+def JDUTC_to_JDTDB(utctime,leap_update,fpath=os.path.dirname(__file__)):
     '''
     Convert JDUTC to JDTDB
     
