@@ -69,23 +69,24 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
                                 OR
-        ra , dec : RA and Dec of star in DEGREES         
+        ra , dec : RA and Dec of star in degrees         
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.0
-        pmra : Proper motion in RA, in MAS/YEAR. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
-        pmdec : Proper motion in Dec, in MAS/YEAR. Default is 0.0
+        pmra : Proper motion in RA, in mas/year. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
+        pmdec : Proper motion in Dec, in mas/year. Default is 0.0
         px : Parallax of target in MAS. Default is 0.0
                                 
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
                   If obsname is not used, then can enter lat,long,alt.
                                 OR 
         lat : Latitude of observatory in degrees. North (+ve) and South (-ve)
-        longi : Longitude of observatory in DEGREES. East (+ve) and West (-ve)
-        alt : Altitude of observatory in METERS
-        rv : Radial Velocity of Target in M/S. Default is 0.0
+        longi : Longitude of observatory in degrees. East (+ve) and West (-ve)
+        alt : Altitude of observatory in meters.
+        
+        rv : Radial Velocity of Target in m/s. Default is 0.0
         zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.0
         ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430. 
-                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB)   
-        ephem=['de432s','de430',
+                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are 
+                    ['de432s','de430',
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']      
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
@@ -93,7 +94,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
                     If False, then will just give a warning message. Default is True.
     
     OUTPUTS:
-        The barycenter-corrected RV (M/S) as defined in Wright & Eastman, 2014.
+        The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
     
     '''
     
