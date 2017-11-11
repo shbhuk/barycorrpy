@@ -24,40 +24,6 @@ from . import utc_tdb
 from .Eastman_applet import bvc
 
 
-
-
-def main():
-    ra=1.734757638888889*15
-    ra=26.0213645867
-    dec=-15.9395557246
-    
-    obsname=''
-    lat=-30.169283
-    longi=-70.806789
-    alt=2241.9
-    leap_dir=os.path.dirname(__file__)
-    
-    epoch = 2451545.0 # Default is J2000 - Julian Day January 1st 2000, 12 noon
-    
-    pmra = -1721.05 # Proper motion in RA in mas/year (scalar). Eg. PMRA = d(RA)/dt * cos(dec)
-    pmdec = 854.16 # Proper motion in dec, in mas(year)
-    px = 273.96 # Parallax in mas 
-    rv = 0.0 # RV of Target in m/s
-    zmeas=0.0
-    
-    ephem=['de432s','de430','https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp','https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
-    ephemeris='https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp'
-    #ephemeris='de430'
-    hip_id=8102
-    #zb_bc=np.loadtxt(os.getcwd()+'/Box Sync/BaryCorr/Acceleration_check/zb.txt')
-    #jds=Time(zb_bc[:,0],format='mjd')
-    #epoch = 2448349.06250
-    
-    a=call_BCPy(JDUTC=Time([datetime.datetime.utcnow(),datetime.datetime.now()],format='datetime'),ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
-        pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephem[3],leap_update=True)
-    print(a)
-
-
 def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     pmdec=0.0,px=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):
     '''
@@ -109,7 +75,8 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     else: 
         print('Taking observatory coordinates from Astropy Observatory database. Check precision.')
         loc=EarthLocation.of_site(obsname)
-        lat=loc.lat.value  # Only need for applet. Can remove ########FIND ME
+        # Only need for applet. Can remove ########FIND ME
+        lat=loc.lat.value  
         longi=loc.lon.value
         alt=loc.height.value 
         

@@ -2,7 +2,7 @@ import numpy as np
 import inspect
 import os
 
-def find_hip(hip_index,cat_dir=os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))+'/hip2.dat'):
+def find_hip(hip_index,cat_dir=os.path.join(os.path.dirname(__file__),'hip2.dat')):
     '''
     NOTE: Hipparcos Catalogue Epoch is J1991.25 or JD 2448349.0625
     
