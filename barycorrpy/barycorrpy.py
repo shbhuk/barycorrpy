@@ -60,8 +60,12 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
                     If False, then will just give a warning message. Default is True.
     
     OUTPUTS:
-        The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
-        warning, error 
+        vel:The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
+        warning, error : Warning and Error message from the routine
+        status : Status regarding warning and error message. Returns the following - 
+                0 - No warning or error.
+                1 - Warning message.
+                2 - Error message. 
         
     
     '''
@@ -69,12 +73,17 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     vel=[]
     warning=[]
     error=[]
+    status=0
     
+    
+    # Notify user if both Hipparcos ID and positional data is given.
     if (type(hip_id) == int) and (hip_id > 0):
+        if np.sum(np.absolute([ra,dec,px,pmra,pmdec,epoch]))>2451545.0:
+            warning+=['Warning: Taking stellar positional data from Hipparcos Catalogue']
+        
+        
         _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
-        print('Reading from Hipparcos Catalogue')
-        
-        
+      
         
     if len(obsname)==0:
         loc=EarthLocation.from_geodetic(longi,lat,height=alt)
@@ -100,7 +109,12 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
         vel.append(a[0])
         warning.append(a[1])
         error.append(a[2])
-    return vel,warning,error
+    
+    #Status messages to check for warning or error
+    if np.size(error)>0:    status=2
+    elif np.size(warning)>0: status=1
+    
+    return vel,warning,error,status
 
 
 
@@ -128,11 +142,6 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     
     # Convert times to obtain TDB and TT 
     JDTDB,JDTT,warning,error=utc_tdb.JDUTC_to_JDTDB(JDUTC,fpath=leap_dir,leap_update=leap_update)
-    
-    ##### OBSERVATORY EUCLIDEAN COORDINATES #####       
-    
-    
-    ## FIND ME ## REMOVE LAT , LONG # Delete applet package
     
     
     ##### NUTATION , PRECESSION , ETC. #####
