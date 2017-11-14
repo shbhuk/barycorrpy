@@ -114,7 +114,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     if np.size(error)>0:    status=2
     elif np.size(warning)>0: status=1
     
-    return vel,warning,error,status
+    return vel,warning+error,status
 
 
 

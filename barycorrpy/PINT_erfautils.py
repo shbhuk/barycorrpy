@@ -13,9 +13,10 @@ from astropy.time import Time
 SECS_PER_DAY = erfa.DAYSEC
 import datetime
 
-from astropy.utils.iers import IERS_A, IERS_A_URL, IERS_B, IERS_B_URL, IERS
+from astropy.utils.iers import conf,IERS_A, IERS_A_URL, IERS_B, IERS_B_URL, IERS
 from astropy.utils.data import download_file
 
+conf.auto_max_age=15
 iers_b_file = download_file(IERS_B_URL, cache=True)
 iers_b = IERS_B.open(iers_b_file)
 IERS.iers_table = iers_b
