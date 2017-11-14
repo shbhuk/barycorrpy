@@ -61,8 +61,14 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     
     OUTPUTS:
         The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
+        warning, error 
+        
     
     '''
+    
+    vel=[]
+    warning=[]
+    error=[]
     
     if (type(hip_id) == int) and (hip_id > 0):
         _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
@@ -73,7 +79,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     if len(obsname)==0:
         loc=EarthLocation.from_geodetic(longi,lat,height=alt)
     else: 
-        print('Taking observatory coordinates from Astropy Observatory database. Check precision.')
+        warning+=['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision.']
         loc=EarthLocation.of_site(obsname)
         # Only need for applet. Can remove ########FIND ME
         lat=loc.lat.value  
@@ -82,14 +88,19 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
         
     
     
-    vel=[]
+
     if np.size(JDUTC)>1:
         for i in range(0,np.size(JDUTC)):               
-            vel.append(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+            a=(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+            vel.append(a[0])
+            warning.append(a[1])
+            error.append(a[2])
     else:
-        vel.append(BCPy(JDUTC=JDUTC,ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
-        
-    return vel
+        a=(BCPy(JDUTC=JDUTC,ra=ra,dec=dec,lat=lat,longi=longi,alt=alt,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
+        vel.append(a[0])
+        warning.append(a[1])
+        error.append(a[2])
+    return vel,warning,error
 
 
 
@@ -116,7 +127,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     GM=[const.G*x for x in [M_sun,0.3301e24,4.867e24,M_earth,0.6417e24,u.M_jup.value,568.5e24,86.82e24,102.4e24,M_moon]]
     
     # Convert times to obtain TDB and TT 
-    JDTDB,JDTT,warning=utc_tdb.JDUTC_to_JDTDB(JDUTC,fpath=leap_dir,leap_update=leap_update)
+    JDTDB,JDTT,warning,error=utc_tdb.JDUTC_to_JDTDB(JDUTC,fpath=leap_dir,leap_update=leap_update)
     
     ##### OBSERVATORY EUCLIDEAN COORDINATES #####       
     
@@ -216,8 +227,8 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     v_final=c*((1.0+zb)*(1.0+zmeas)-1.0)
     
     ##### Call Eastman applet to compare #####FIND ME
-    res = bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch)
+    #res = bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch)
     
-    return v_final,res,warning
+    return v_final,warning,error
     
 

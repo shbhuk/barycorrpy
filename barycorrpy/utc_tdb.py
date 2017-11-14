@@ -12,8 +12,8 @@ def staleness_check(file_time,now):
     '''
     Check whether the leap second file needs to be updated.
     
-    Leap second updates generally announced on December 31st or June 30th. Thus assuming a month lag for the list to be updated, 
-    check if if a February 1st or August 1st has passed between when the file was downloaded and when the check is being run. 
+    Leap second updates generally announced shortly after December 31st or June 30th. Thus assuming a month lag for the list to be updated, 
+    check if a February 1st or August 1st has passed between when the file was downloaded and when the check is being run. 
     
     INPUT:
         Both inputs are in datetime format
@@ -70,11 +70,13 @@ def leap_manage(utctime,fpath,leap_update):
     
     OUTPUT: 
         tai_utc : Leap second offset between TAI and UTC (Scalar)
+        warning, error : Warning and Error messages 
         
         Offset in seconds, between TAI and UTC.   
     '''
     
-    warning=[]    
+    warning=[]
+    error=[]    
 
     # Location of saved leap second file
     ls_fpath=os.path.join(fpath,'leap_sec.txt')
@@ -82,18 +84,17 @@ def leap_manage(utctime,fpath,leap_update):
     # Location of log file to record how old is the leap second file
     log_fpath=os.path.join(fpath,'leapsec_log.txt')
        
-    # If log file does not exist, then download the leap second file and create a log file
+    # If log or leap file does not exist, then download the leap second file and create a log file
     if (os.path.isfile(log_fpath)==False or os.path.isfile(ls_fpath)==False):
         if leap_update==True:
             leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
-            warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+            warning+=['JD = '+str(utctime.jd)+' : Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
         else:
-            warning+=['ERROR : LEAP SECOND FILE / LOG FILE DOES NOT EXIST. Please set leap_update = True to update file. Corrections may not be accurate ']
-            return 0,warning
+            error+=['ERROR : JD = '+str(utctime.jd)+' :  LEAP SECOND FILE / LOG FILE DOES NOT EXIST. Please set leap_update = True to update file. Corrections may not be accurate ']
+            return 0,warning,error
 
 
     # If file exists then check if need to update
-    
     else:
         
         with open(log_fpath,'r') as f:
@@ -101,15 +102,16 @@ def leap_manage(utctime,fpath,leap_update):
          
         now=datetime.datetime.utcnow()  # Current time  
 
-        
-        # Check if need to update file
-        if staleness_check(file_time,now)==1:
-            warning+=['WARNING : Need to update leap second file. Corrections may not be accurate to 1 cm/s with old file']
-            if leap_update==True:
-                leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)  
-                warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
-                    
-            else: warning+=["ERROR : Leap second file should be updated. Set leap_update = True to download file"]
+        if file_time<utctime.datetime:
+    
+            # Check if need to update file
+            if staleness_check(file_time,now)==1:
+                warning+=['WARNING : JD = '+str(utctime.jd)+' :  Need to update leap second file. Corrections may not be accurate to 1 cm/s with old file']
+                if leap_update==True:
+                    leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)  
+                    warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+                        
+                else: error+=['ERROR : JD = '+str(utctime.jd)+' :  Leap second file should be updated. Set leap_update = True to download file']
 
     f=open(ls_fpath,'r')
     jd=[]
@@ -129,7 +131,7 @@ def leap_manage(utctime,fpath,leap_update):
 
     tai_utc=offset[np.max(np.where(JDUTC>=np.array(jd)))] # Leap second offset value to convert UTC to TAI
         
-    return tai_utc  , warning
+    return tai_utc  , warning , error
  
 
 def JDUTC_to_JDTDB(utctime,leap_update,fpath=os.path.dirname(__file__)):
@@ -153,13 +155,13 @@ def JDUTC_to_JDTDB(utctime,leap_update,fpath=os.path.dirname(__file__)):
     '''
     JDUTC=utctime.jd
     if JDUTC<2441317.5 : 
-        return JDUTC.tdb,JDUTC.tt,['WARNING : Precise leap second history is not maintained here for before 1972. Defaulting to Astropy. Corrections maybe inaccurate']
+        return utctime.tdb,utctime.tt,['WARNING : JD = '+str(utctime.jd)+' :  Precise leap second history is not maintained here for before 1972. Defaulting to Astropy. Corrections maybe inaccurate'],[]
 
     # Call function to check leap second file and find offset between UTC and TAI. 
-    tai_utc,warning=leap_manage(utctime=utctime,fpath=fpath,leap_update=leap_update)
+    tai_utc,warning,error=leap_manage(utctime=utctime,fpath=fpath,leap_update=leap_update)
     
     if tai_utc==0:
-        return JDUTC.tdb,JDUTC.tt,warning+['ERROR : Unable to maintain leap second file. Defaulting to AstroPy version']        
+        return utctime.tdb,utctime.tt,warning,error+['ERROR : JD = '+str(utctime.jd)+' :  Unable to maintain leap second file. Defaulting to AstroPy version']        
 
     check_time=utctime.datetime
     
@@ -177,4 +179,4 @@ def JDUTC_to_JDTDB(utctime,leap_update,fpath=os.path.dirname(__file__)):
     JDTDB = Time(TDB,scale='tdb',format='datetime')
     JDTDB.format='jd'
 
-    return JDTDB,JDTT,warning
+    return JDTDB,JDTT,warning,error
