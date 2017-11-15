@@ -15,6 +15,7 @@ setup(name='barycorrpy',
       author_email='shbhuk@gmail.com',
       install_requires=['astropy','jplephem','numpy','scipy'],
       packages=['barycorrpy'],
+      license='GPLv3',
       classifiers=['Topic :: Scientific/Engineering :: Astronomy'],
       keywords='Barycentric Correction Astronomy Spectroscopy Radial Velocity',
       include_package_data=True
