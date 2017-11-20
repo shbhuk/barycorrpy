@@ -88,13 +88,12 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     if len(obsname)==0:
         loc=EarthLocation.from_geodetic(longi,lat,height=alt)
     else: 
-        warning+=['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision.']
+
         loc=EarthLocation.of_site(obsname)
-        # Only need for applet. Can remove ########FIND ME
         lat=loc.lat.value  
         longi=loc.lon.value
         alt=loc.height.value 
-        
+        warning+=['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f \t Longitude = %f \t Altitude = %f'%(lat,longi,alt)]        
     
     
 

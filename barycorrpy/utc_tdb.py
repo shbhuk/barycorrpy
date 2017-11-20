@@ -102,7 +102,7 @@ def leap_manage(utctime,fpath,leap_update):
          
         now=datetime.datetime.utcnow()  # Current time  
 
-        if file_time<utctime.datetime:
+        if file_time<utctime.datetime:  # Check for file staleness if test time is after the last file update time
     
             # Check if need to update file
             if staleness_check(file_time,now)==1:
