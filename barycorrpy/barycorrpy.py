@@ -22,6 +22,12 @@ from . import utc_tdb
 #de430 is 100 MB in size
 
 from .Eastman_applet import bvc
+version = '0.1'
+
+def print_version():
+    print('Current version : '+str(version))
+    return version
+    
 
 
 def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
