@@ -30,7 +30,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values)
     
-    INPUTS:      
+    INPUT:      
         JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale. 
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
@@ -59,7 +59,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                     If False, then will just give a warning message. Default is True.
     
-    OUTPUTS:
+    OUTPUT:
         vel:The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
         warning, error : Warning and Error message from the routine
         status : Status regarding warning and error message. Returns the following - 

@@ -137,17 +137,17 @@ def leap_manage(utctime,fpath,leap_update):
 def JDUTC_to_JDTDB(utctime,leap_update,fpath=os.path.dirname(__file__)):
     '''
     Convert JDUTC to JDTDB
+    INPUT:
+        utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
     
-    utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
-    
-    fpath : Path to where the file would be saved. Default is script directory.
-    leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.
+        fpath : Path to where the file would be saved. Default is script directory.
+        leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.
                   If False, then will just give a warning message.     
     
-    Output:
+    OUTPUT:
         JDTDB : Julian Date Barycentric Dynamic Time (Astropy Time object)
         JDTT: Julian Date Terrestrial Dynamic time (Astropy Time object)
-        warning : Error message if any from 
+        warning,error : Warning and Error message if any from the routine
         
         
         
