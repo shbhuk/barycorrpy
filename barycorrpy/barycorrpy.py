@@ -83,7 +83,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     # Notify user if both Hipparcos ID and positional data is given.
     if (type(hip_id) == int) and (hip_id > 0):
         if np.sum(np.absolute([ra,dec,px,pmra,pmdec,epoch]))>2451545.0:
-            warning+=['Warning: Taking stellar positional data from Hipparcos Catalogue']
+            warning+=[['Warning: Taking stellar positional data from Hipparcos Catalogue']]
         
         
         _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
@@ -97,8 +97,8 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
         lat=loc.lat.value  
         longi=loc.lon.value
         alt=loc.height.value 
-        warning+=['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f \t Longitude = %f \t Altitude = %f'%(lat,longi,alt)]        
-    
+        warning+=[['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f  Longitude = %f  Altitude = %f'%(lat,longi,alt)]]
+        
     if JDUTC.isscalar:
         JDUTC=Time([JDUTC])
 
@@ -109,6 +109,7 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
         warning.append(a[1])
         error.append(a[2])
     
+
     #Status messages to check for warning or error
     if np.size(error)>0:    status=2
     elif np.size(warning)>0: status=1
@@ -236,9 +237,9 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     v_final=c*((1.0+zb)*(1.0+zmeas)-1.0)  #m/s
     
     ##### Call Eastman applet to compare #####FIND ME
-    res=(v_final-bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch))*1000
+    #res=(v_final-bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch))*1000
     #print(res,(v_final-res)*1000)
     
-    return res,warning,error
+    return v_final,warning,error
     
 

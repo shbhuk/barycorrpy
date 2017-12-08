@@ -24,7 +24,6 @@ def staleness_check(file_time,now):
     Return 1 if need to update, else return 0. 
        
     '''
-    
     if file_time.month > 8 :
         year=file_time.year+1
     else: year=file_time.year
