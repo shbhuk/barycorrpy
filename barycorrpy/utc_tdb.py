@@ -104,7 +104,7 @@ def leap_manage(utctime,fpath,leap_update):
         if leap_update==True:
             flag=leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
             if flag==0:
-                warning+=['JD = '+str(utctime.jd)+' : Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+                warning+=['WARNING JD = '+str(utctime.jd)+' : Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
             else:
                 error+=['ERROR : JD = '+str(utctime.jd)+' :  Unable to download leap second file. Check internet connection or leap_dir parameter']
                 return 0,warning,error
