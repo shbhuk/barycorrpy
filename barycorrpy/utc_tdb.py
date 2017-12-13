@@ -44,8 +44,8 @@ def leap_download(ls_fpath,log_fpath):
     
     url='http://maia.usno.navy.mil/ser7/tai-utc.dat'
     
-    openURL = urllib.URLopener()
-    openURL.retrieve(url, ls_fpath)
+    urllib.request.urlretrieve( url,ls_fpath)
+
         
     with open(log_fpath,'w') as f:
         f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
