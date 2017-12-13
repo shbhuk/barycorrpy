@@ -50,7 +50,7 @@ def leap_download(ls_fpath,log_fpath):
             flag=0
             with open(log_fpath,'w') as f:
                 f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
-        except (urllib.error.URLError):
+        except (urllib.error.URLError,IOError):
             flag=1
     else:
         import urllib2
@@ -59,7 +59,7 @@ def leap_download(ls_fpath,log_fpath):
             flag=0
             with open(log_fpath,'w') as f:
                 f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
-        except urllib2.HTTPError:
+        except urllib2.HTTPError,IOError:
             flag=1
         
 
