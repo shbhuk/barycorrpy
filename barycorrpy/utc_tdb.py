@@ -134,7 +134,10 @@ def leap_manage(utctime,fpath,leap_update):
                         error+=['ERROR : JD = '+str(utctime.jd)+' :  Unable to download leap second file. Check internet connection or leap_dir parameter']    
                         return 0,warning,error
                         
-                else: error+=['ERROR : JD = '+str(utctime.jd)+' :  Leap second file should be updated. Set leap_update = True to download file']
+                else: 
+                    error+=['ERROR : JD = '+str(utctime.jd)+' :  Leap second file should be updated. Set leap_update = True to download file']
+                    return 0,warning,error
+                
 
     f=open(ls_fpath,'r')
     jd=[]
