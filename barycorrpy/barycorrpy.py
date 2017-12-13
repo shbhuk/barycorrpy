@@ -21,7 +21,6 @@ from . import utc_tdb
 ### Need to install jplephem ### 
 #de430 is 100 MB in size
 
-from .Eastman_applet import bvc
 version = '0.1'
 
 def print_version():
@@ -236,9 +235,6 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     zb = -1.0 - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth,rhohat))*(1+np.dot(r0hat,beta_star))/((1+np.dot(beta_star,rhohat))*(1+zgravity)) # Eq 28
     v_final=c*((1.0+zb)*(1.0+zmeas)-1.0)  #m/s
     
-    ##### Call Eastman applet to compare #####FIND ME
-    #res=(v_final-bvc(jd_utc=JDUTC.jd, ra=ra, dec=dec, lat=lat, lon=longi, elevation=alt,pmra=pmra,pmdec=pmdec,parallax=px,rv=rv,zmeas=zmeas, epoch=epoch))*1000
-    #print(res,(v_final-res)*1000)
     
     return v_final,warning,error
     
