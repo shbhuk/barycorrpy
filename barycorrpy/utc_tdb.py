@@ -6,7 +6,7 @@ import os
 import datetime
 from astropy.time import Time
 import numpy as np
-
+import sys
 
 def staleness_check(file_time,now):
     '''
@@ -43,13 +43,24 @@ def leap_download(ls_fpath,log_fpath):
     '''
     
     url='http://maia.usno.navy.mil/ser7/tai-utc.dat'
-    try:
-        urllib.request.urlretrieve( url,ls_fpath)
-        flag=0
-        with open(log_fpath,'w') as f:
-            f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
-    except (urllib.error.URLError):
-        flag=1
+    
+    if sys.version_info.major==3:
+        try:
+            urllib.request.urlretrieve( url,ls_fpath)
+            flag=0
+            with open(log_fpath,'w') as f:
+                f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
+        except (urllib.error.URLError):
+            flag=1
+    else:
+        import urllib2
+        try:
+            urllib.urlopen( url,ls_fpath)
+            flag=0
+            with open(log_fpath,'w') as f:
+                f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
+        except urllib2.HTTPError:
+            flag=1
         
 
         
