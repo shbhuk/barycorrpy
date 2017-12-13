@@ -43,12 +43,17 @@ def leap_download(ls_fpath,log_fpath):
     '''
     
     url='http://maia.usno.navy.mil/ser7/tai-utc.dat'
-    
-    urllib.request.urlretrieve( url,ls_fpath)
+    try:
+        urllib.request.urlretrieve( url,ls_fpath)
+        flag=0
+        with open(log_fpath,'w') as f:
+            f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
+    except (urllib.error.URLError):
+        flag=1
+        
 
         
-    with open(log_fpath,'w') as f:
-        f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
+    return flag
          
    
 def leap_manage(utctime,fpath,leap_update):
@@ -86,8 +91,12 @@ def leap_manage(utctime,fpath,leap_update):
     # If log or leap file does not exist, then download the leap second file and create a log file
     if (os.path.isfile(log_fpath)==False or os.path.isfile(ls_fpath)==False):
         if leap_update==True:
-            leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
-            warning+=['JD = '+str(utctime.jd)+' : Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+            flag=leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
+            if flag==0:
+                warning+=['JD = '+str(utctime.jd)+' : Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+            else:
+                error+=['ERROR : JD = '+str(utctime.jd)+' :  Unable to download leap second file. Check internet connection or leap_dir parameter']
+                return 0,warning,error
         else:
             error+=['ERROR : JD = '+str(utctime.jd)+' :  LEAP SECOND FILE / LOG FILE DOES NOT EXIST. Please set leap_update = True to update file. Corrections may not be accurate ']
             return 0,warning,error
@@ -107,8 +116,12 @@ def leap_manage(utctime,fpath,leap_update):
             if staleness_check(file_time,now)==1:
                 warning+=['WARNING : JD = '+str(utctime.jd)+' :  Need to update leap second file. Corrections may not be accurate to 1 cm/s with old file']
                 if leap_update==True:
-                    leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)  
-                    warning+=['Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+                    flag=leap_download(ls_fpath=ls_fpath,log_fpath=log_fpath)
+                    if flag==0:
+                        warning+=['JD = '+str(utctime.jd)+' : Downloaded leap second file from http://maia.usno.navy.mil/ser7/tai-utc.dat ']            
+                    else:
+                        error+=['ERROR : JD = '+str(utctime.jd)+' :  Unable to download leap second file. Check internet connection or leap_dir parameter']    
+                        return 0,warning,error
                         
                 else: error+=['ERROR : JD = '+str(utctime.jd)+' :  Leap second file should be updated. Set leap_update = True to download file']
 
