@@ -28,4 +28,4 @@ In this routine `utc_tdb.py`, we incorporate this is a stand alone file which is
 
 ### INSTALLATION INSTRUCTIONS
 
-The installation instructions for this package are detailed in the [Wiki](https://github.com/shbhuk/barycorrpy/wiki)
+The installation instructions for this package are detailed in the [Wiki](https://github.com/shbhuk/barycorrpy/wiki).
