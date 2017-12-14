@@ -2,6 +2,9 @@
 Version 0.1
 UNDER TESTING
 
+[![DOI](https://zenodo.org/badge/106101961.svg)](https://zenodo.org/badge/latestdoi/106101961)
+
+
 Barycorrpy is the Python version of Jason Eastman and Jason Wright's IDL code [BaryCorr](http://astroutils.astronomy.ohio-state.edu/exofast/pro/exofast/bary/zbarycorr.pro) based on [Wright and Eastman (2014)](https://arxiv.org/pdf/1409.4774.pdf) . BCPy can be used to calculate the barycentric velocity correction for a star with an accuracy of ~ 1 cm/s . 
 To do this, it takes into consideration the following - 
 
