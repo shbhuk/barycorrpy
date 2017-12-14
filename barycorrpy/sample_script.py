@@ -3,8 +3,8 @@ from .barycorrpy import call_BCPy
 from astropy.time import Time
 import datetime
 
-    def run_sample():
-        JDUTC = Time(2458000,format='jd',scale='utc')
+def run_sample():
+        JDUTC = Time(2458000,format='jd',scale='utc',zmeas=0)
         
         # Observation of Tau Ceti taken from CTIO on JD 2458000. 
         # Observatory location manually entered. Stellar positional parameters taken from Hipparcos Catalogue
