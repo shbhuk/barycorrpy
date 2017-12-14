@@ -21,11 +21,6 @@ from . import utc_tdb
 ### Need to install jplephem ### 
 #de430 is 100 MB in size
 
-version = '0.1'
-
-def print_version():
-    print('Current version : '+str(version))
-    return version
 
 def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     pmdec=0.0,px=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):

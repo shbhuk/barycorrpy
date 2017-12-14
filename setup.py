@@ -4,7 +4,7 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
-
+VERSION = '0.1'
 
 setup(name='barycorrpy',
       version='0.1',
