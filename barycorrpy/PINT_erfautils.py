@@ -1,6 +1,6 @@
 # This is taken from PINT - https://github.com/nanograv/PINT/blob/master/pint/erfautils.py. For licensing see license file on PINT github repository. 
 # https://github.com/nanograv/PINT/blob/ea1c3b9f71c06a73d6613d647770b99924f7c9bf/LICENSE.md
-
+from __future__ import division
 import numpy as np
 import astropy.units as un
 try:
@@ -18,6 +18,7 @@ from astropy.utils.data import download_file
 from . import utc_tdb
 
 conf.auto_max_age=15
+print('The IERS Bulletin download may take a few minutes.')
 iers_b_file = download_file(IERS_B_URL, cache=True)
 iers_b = IERS_B.open(iers_b_file)
 IERS.iers_table = iers_b
