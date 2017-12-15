@@ -22,7 +22,7 @@ from . import utc_tdb
 #de430 is 100 MB in size
 
 
-def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
+def get_BC_vel(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     pmdec=0.0,px=0.0,obsname='',lat=0.0,longi=0.0,alt=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__), leap_update = True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
@@ -108,7 +108,9 @@ def call_BCPy(JDUTC,hip_id=0,ra=0.0,dec=0.0,epoch=2451545.0,pmra=0.0,
     if np.size(error)>0:    status=2
     elif np.size(warning)>0: status=1
     if vel==0: error+=['Check inputs. Error in code']
-    
+    # Convert velocity from list to numpy array
+    vel=np.array(vel)
+        
     return vel,warning+error,status
 
 
@@ -118,7 +120,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,lat=0.0,longi=0.0,alt=0.0,loc=0.0,epoch=2451545.0,
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
-    See call_BCPy() for parameter description
+    See get_BC_vel() for parameter description
     
     '''
     

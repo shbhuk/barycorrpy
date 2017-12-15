@@ -4,7 +4,7 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
-VERSION = '0.1'
+
 
 setup(name='barycorrpy',
       version='0.1',
@@ -13,7 +13,7 @@ setup(name='barycorrpy',
       url='https://github.com/shbhuk/barycorrpy',
       author='Shubham Kanodia',
       author_email='shbhuk@gmail.com',
-      install_requires=['astropy>=2','jplephem','numpy','scipy'],
+      install_requires=['astropy>2','jplephem','numpy','scipy'],
       packages=['barycorrpy'],
       license='GPLv3',
       classifiers=['Topic :: Scientific/Engineering :: Astronomy'],
