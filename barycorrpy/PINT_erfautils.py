@@ -18,7 +18,7 @@ from astropy.utils.data import download_file
 from . import utc_tdb
 
 conf.auto_max_age=15
-print('The IERS Bulletin download may take a few minutes.')
+
 iers_b_file = download_file(IERS_B_URL, cache=True)
 iers_b = IERS_B.open(iers_b_file)
 IERS.iers_table = iers_b
