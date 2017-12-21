@@ -1,6 +1,5 @@
 # barycorrpy
 Version 0.1
-UNDER TESTING
 
 [![DOI]
 
