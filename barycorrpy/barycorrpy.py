@@ -3,7 +3,7 @@ from __future__ import print_function
 #import de423    #https://pypi.python.org/pypi/jplephem
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import solar_system_ephemeris
-from astropy.coordinates import get_body_barycentric_posvel,get_body_barycentric
+from astropy.coordinates import get_body_barycentric_posvel, get_body_barycentric
 from astropy.time import Time
 import datetime
 import math
@@ -65,7 +65,6 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
                 0 - No warning or error.
                 1 - Warning message.
                 2 - Error message. 
-        
     
     '''
     
@@ -77,7 +76,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
     
     # Notify user if both Hipparcos ID and positional data is given.
     if isinstance(hip_id, int) and (hip_id > 0):
-        if any([ra, dec,px,pmra,pmdec,epoch-2451545.0]):
+        if any([ra, dec, px, pmra, pmdec, epoch-2451545.0]):
             warning += [['Warning: Taking stellar positional data from Hipparcos Catalogue']]
         
         _, ra, dec, px, pmra, pmdec, epoch = find_hip(hip_id)
@@ -125,7 +124,7 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     
     AU = const.astronomical_unit # 1 AU in meters
     c = const.c # Speed of light in m/s
-    pctoau = 3600*180/np.pi #No. of AU in one parsec
+    pctoau = 3600*180/np.pi # No. of AU in one parsec
     year = 365.25*3600*24 # 1 year in seconds
     kmstoauyr = year/(1000*AU)
     
@@ -151,7 +150,7 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
             
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # km
     r_obs = r_eci + earth_geo[0].xyz.value*1000. # meters
-    v_geo = earth_geo[1].xyz.value*1000./(86400.)  # meters/second
+    v_geo = earth_geo[1].xyz.value*1000./86400.  # m/s
     
     # Relativistic Addition of Velocities
     v_obs = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # m/s
@@ -183,7 +182,7 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     # Parallax correction 
     if px>0:
         rho = 1000.0*rhat/px*pctoau-r_obs/AU # In AU
-        rhohat = rho/math.sqrt(sum(rho*rho)) # Unitless
+        rhohat = rho / math.sqrt(sum(rho*rho)) # Unitless
         r0 = 1000.0/px*pctoau*AU # In meters
         beta_star = r0*mu/c/year + rv*r0hat/c
         
@@ -192,7 +191,7 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     else:
         rhohat = rhat
         beta_star = [0., 0., 0.]
-        zlighttravel = 0.0
+        zlighttravel = 0.
 
     
     ##### Calculate Gravitaional Redshift due to Solar system bodies #####
@@ -227,7 +226,7 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     gamma_earth = 1. / math.sqrt(1.-sum(beta_earth**2))
     
     zb = -1.0 - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth, rhohat))*(1+np.dot(r0hat, beta_star))/((1+np.dot(beta_star, rhohat))*(1+zgravity)) # Eq 28
-    v_final = c*((1.0+zb)*(1.0+zmeas)-1.0)  #m/s
+    v_final = c*((1.0+zb)*(1.0+zmeas)-1.0)  # m/s
     
     
     return v_final, warning, error
