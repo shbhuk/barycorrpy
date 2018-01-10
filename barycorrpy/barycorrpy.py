@@ -80,7 +80,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
         if any([ra, dec,px,pmra,pmdec,epoch-2451545.0]):
             warning += [['Warning: Taking stellar positional data from Hipparcos Catalogue']]
         
-        _,ra,dec,px,pmra,pmdec,epoch = find_hip(hip_id)
+        _, ra, dec, px, pmra, pmdec, epoch = find_hip(hip_id)
         
     if obsname:
         loc = EarthLocation.of_site(obsname)
@@ -89,7 +89,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
         alt = loc.height.value
         warning += [['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f  Longitude = %f  Altitude = %f'%(lat,longi,alt)]]
     else: 
-        loc = EarthLocation.from_geodetic(longi,lat,height=alt)
+        loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
@@ -97,7 +97,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
     for jdutc in JDUTC:
         a = BCPy(JDUTC=jdutc, ra=ra, dec=dec, lat=lat, longi=longi, alt=alt, loc=loc,
                  pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch,
-                 ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)
+                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         vel.append(a[0])
         warning.append(a[1])
         error.append(a[2])
@@ -115,7 +115,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
 
 def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=2451545.0,
          pmra=0.0, pmdec=0.0, px=0.0, rv=0.0, zmeas=0.0,
-         ephemeris='de430',leap_dir=os.path.dirname(__file__),leap_update = True ) :
+         ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True) :
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
@@ -198,14 +198,13 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     ##### Calculate Gravitaional Redshift due to Solar system bodies #####
     
     bodies = solar_system_ephemeris.bodies
-    
     ss_bodies = [bodies[i] for i in [1, 3, 4, 0, 6, 7, 8, 9, 10, 2]]   # Sun, Mercury , Venus, Earth, Mars, Jupiter, Saturn , Uranus , Neptune, Moon
     
     Sum_GR = 0.
     zshapiro = 0.
     
     for i in range(len(ss_bodies)):
-        jplephem = get_body_barycentric(ss_bodies[i],JDTDB,ephemeris=ephemeris)
+        jplephem = get_body_barycentric(ss_bodies[i], JDTDB, ephemeris=ephemeris)
         pos_obj = jplephem.xyz.value*1000. # meters
         
         # Vector from object barycenter to Observatory
