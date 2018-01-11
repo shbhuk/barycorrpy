@@ -22,8 +22,8 @@ from . import utc_tdb
 #de430 is 100 MB in size
 
 
-def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmdec=0.0, px=0.0, 
-       obsname='', lat=0.0, longi=0.0, alt=0.0, rv=0.0, zmeas=0.0,
+def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0., 
+       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
@@ -35,10 +35,10 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
                                 OR
         ra, dec : RA and Dec of star [degrees]
-        epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.0
-        pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.0
-        pmdec : Proper motion in Dec [mas/year]. Default is 0.0
-        px : Parallax of target [MAS]. Default is 0.0
+        epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.
+        pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
+        pmdec : Proper motion in Dec [mas/year]. Default is 0.
+        px : Parallax of target [MAS]. Default is 0.
                                 
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
                   If obsname is not used, then can enter lat,long,alt.
@@ -47,8 +47,8 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve)
         alt : Altitude of observatory [m].
         
-        rv : Radial Velocity of Target [m/s]. Default is 0.0
-        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.0
+        rv : Radial Velocity of Target [m/s]. Default is 0.
+        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
         ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430. 
                     For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are 
                     ['de432s','de430',
@@ -76,7 +76,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
     
     # Notify user if both Hipparcos ID and positional data is given.
     if isinstance(hip_id, int) and (hip_id > 0):
-        if any([ra, dec, px, pmra, pmdec, epoch-2451545.0]):
+        if any([ra, dec, px, pmra, pmdec, epoch-2451545.]):
             warning += [['Warning: Taking stellar positional data from Hipparcos Catalogue']]
         
         _, ra, dec, px, pmra, pmdec, epoch = find_hip(hip_id)
@@ -112,8 +112,8 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmde
     return vel, warning+error, status
 
 
-def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=2451545.0,
-         pmra=0.0, pmdec=0.0, px=0.0, rv=0.0, zmeas=0.0,
+def BCPy(JDUTC, ra=0., dec=0., lat=0., longi=0., alt=0., loc=0., epoch=2451545.,
+         pmra=0., pmdec=0., px=0., rv=0., zmeas=0.,
          ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True) :
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
@@ -170,8 +170,8 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     
     ##### Stellar position at each time #####
     
-    epoch0 = 2000.0 + (epoch-2451545.0)/365.25
-    yearnow = 2000.0 + (JDTDB.jd-2451545.0)/365.25
+    epoch0 = 2000. + (epoch-2451545.)/365.25
+    yearnow = 2000. + (JDTDB.jd-2451545.)/365.25
     
     T = yearnow - epoch0                           # [years]
     vpi = rv/1.e3 * kmstoauyr * (px/1.e3/pctoau)   # [rad/yr]
@@ -181,9 +181,9 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     
     # Parallax correction 
     if px>0:
-        rho = 1000.0*rhat/px*pctoau - r_obs/AU # [AU]
+        rho = 1000.*rhat/px*pctoau - r_obs/AU # [AU]
         rhohat = rho / math.sqrt(sum(rho*rho)) # Unitless
-        r0 = 1000.0/px*pctoau*AU # [m]
+        r0 = 1000./px*pctoau*AU # [m]
         beta_star = r0*mu/c/year + rv*r0hat/c
         
         zlighttravel = rv*r0*sum(mu*mu)*T/(year*c*c)
@@ -225,8 +225,8 @@ def BCPy(JDUTC, ra=0.0, dec=0.0, lat=0.0, longi=0.0, alt=0.0, loc=0.0, epoch=245
     
     gamma_earth = 1. / math.sqrt(1.-sum(beta_earth**2))
     
-    zb = -1.0 - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth, rhohat))*(1+np.dot(r0hat, beta_star))/((1+np.dot(beta_star, rhohat))*(1+zgravity)) # Eq 28
-    v_final = c * ((1.0+zb)*(1.0+zmeas)-1.0)  # [m/s]
+    zb = -1. - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth, rhohat))*(1+np.dot(r0hat, beta_star))/((1.+np.dot(beta_star, rhohat))*(1.+zgravity)) # Eq 28
+    v_final = c * ((1.+zb)*(1.+zmeas)-1.)  # [m/s]
     
     
     return v_final, warning, error
