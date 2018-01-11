@@ -5,32 +5,30 @@ from astropy.coordinates import EarthLocation
 from astropy.coordinates import solar_system_ephemeris
 from astropy.coordinates import get_body_barycentric_posvel, get_body_barycentric
 from astropy.time import Time
-import datetime
 import math
 import scipy.constants as const
 import astropy.constants as u
 import numpy as np
 import os
-import sys
 
 
 from .read_HIP import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
 
-### Need to install jplephem ### 
+### Need to install jplephem ###
 #de430 is 100 MB in size
 
 
-def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0., 
+def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
        obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values)
     
-    INPUT:      
-        JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale. 
+    INPUT:
+        JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale.
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
                                 OR
@@ -39,21 +37,21 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
         pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
         pmdec : Proper motion in Dec [mas/year]. Default is 0.
         px : Parallax of target [MAS]. Default is 0.
-                                
-        obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names(). 
+        
+        obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
                   If obsname is not used, then can enter lat,long,alt.
-                                OR 
+                                OR
         lat : Latitude of observatory in [degrees]. North (+ve) and South (-ve)
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve)
         alt : Altitude of observatory [m].
         
         rv : Radial Velocity of Target [m/s]. Default is 0.
         zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
-        ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430. 
-                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are 
+        ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
+                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
                     ['de432s','de430',
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
-                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']      
+                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                     If False, then will just give a warning message. Default is True.
@@ -61,11 +59,17 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
     OUTPUT:
         vel:The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
         warning, error : Warning and Error message from the routine
-        status : Status regarding warning and error message. Returns the following - 
+        status : Status regarding warning and error message. Returns the following -
                 0 - No warning or error.
                 1 - Warning message.
-                2 - Error message. 
+                2 - Error message.
     
+    Example:
+    >>> from astropy.time import Time
+    >>> JDUTC = Time(2458000, format='jd', scale='utc')
+    >>> get_BC_vel(JDUTC, hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9)
+    (array([15403.95089287]), [[], []], 0)
+
     '''
     
     vel = []
@@ -108,7 +112,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
     if vel==0: error += ['Check inputs. Error in code']
     # Convert velocity from list to numpy array
     vel = np.array(vel)
-        
+    
     return vel, warning+error, status
 
 
@@ -147,21 +151,21 @@ def BCPy(JDUTC, ra=0., dec=0., lat=0., longi=0., alt=0., loc=0., epoch=2451545.,
     v_eci = v_pint[0]  # [m/s]
     
     ##### EPHEMERIDES #####
-            
+    
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
     r_obs = r_eci + earth_geo[0].xyz.value*1000. # [m]
     v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
     
     # Relativistic Addition of Velocities
-    v_obs = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # m/s
+    v_obs = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
     beta_earth = v_obs/c
-   
+    
     
     ##### Convert Star RA DEC to R0hat vector #####
     
     r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.), math.sin(ra*np.pi/180.)*math.cos(dec*np.pi/180.), math.sin(dec*np.pi/180.)])
     # Eq 14 to 17
-    up = [0., 0., 1.] 
+    up = [0., 0., 1.]
     east = np.cross(up, r0hat)
     east = east / math.sqrt(sum(east*east))
     north = np.cross(r0hat, east)
@@ -179,7 +183,7 @@ def BCPy(JDUTC, ra=0., dec=0., lat=0., longi=0., alt=0., loc=0., epoch=2451545.,
     r = r0hat + vel*T                              # [rad]    (p1 in AA)
     rhat = r / math.sqrt(sum(r*r))
     
-    # Parallax correction 
+    # Parallax correction
     if px>0:
         rho = 1000.*rhat/px*pctoau - r_obs/AU # [AU]
         rhohat = rho / math.sqrt(sum(rho*rho)) # Unitless
@@ -230,5 +234,5 @@ def BCPy(JDUTC, ra=0., dec=0., lat=0., longi=0., alt=0., loc=0., epoch=2451545.,
     
     
     return v_final, warning, error
-    
+
 
