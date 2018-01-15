@@ -96,16 +96,11 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
         
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
-    
-<<<<<<< HEAD
-    for i in range(0,np.size(JDUTC)):               
-        a=(BCPy(JDUTC=JDUTC[i],ra=ra,dec=dec,loc=loc,pmra=pmra,pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update))
-=======
+
     for jdutc in JDUTC:
         a = BCPy(JDUTC=jdutc, ra=ra, dec=dec, lat=lat, longi=longi, alt=alt, loc=loc,
                  pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
->>>>>>> c315c03c16c0adc2783af991a5373ee69a8b1d4d
         vel.append(a[0])
         warning.append(a[1])
         error.append(a[2])
@@ -121,14 +116,10 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
     return vel, warning+error, status
 
 
-<<<<<<< HEAD
+
 def BCPy(JDUTC,ra=0.0,dec=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
     pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__),leap_update = True ) :
-=======
-def BCPy(JDUTC, ra=0., dec=0., lat=0., longi=0., alt=0., loc=0., epoch=2451545.,
-         pmra=0., pmdec=0., px=0., rv=0., zmeas=0.,
-         ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True) :
->>>>>>> c315c03c16c0adc2783af991a5373ee69a8b1d4d
+
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
