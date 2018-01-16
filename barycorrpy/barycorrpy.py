@@ -98,7 +98,7 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
         JDUTC = Time([JDUTC])
 
     for jdutc in JDUTC:
-        a = BCPy(JDUTC=jdutc, ra=ra, dec=dec, lat=lat, longi=longi, alt=alt, loc=loc,
+        a = BCPy(JDUTC=jdutc, ra=ra, dec=dec, loc=loc,
                  pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         vel.append(a[0])

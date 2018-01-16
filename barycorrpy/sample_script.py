@@ -38,8 +38,8 @@ def run_sample():
             result3,warning3,flag3=get_BC_vel(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
                 pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_update=True)
                 
-            if result3[2]>0:
-                print('Check')
+            if warning3:
+                print('Check ')
         
         
             return result,result2,result3,warning3,flag3
