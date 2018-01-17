@@ -98,15 +98,16 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
         JDUTC = Time([JDUTC])
 
     for jdutc in JDUTC:
-        a = BCPy(JDUTC=jdutc, ra=ra, dec=dec, loc=loc,
-                 pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch,
+        a = BCPy(JDUTC=jdutc,
+                 ra=ra, dec=dec, pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch,
+                 loc=loc,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         vel.append(a[0])
         warning.append(a[1])
         error.append(a[2])
     
 
-    #Status messages to check for warning or error
+    # Status messages to check for warning or error
     if any(error):   status |= 2
     if any(warning): status |= 1
     if vel==0: error += ['Check inputs. Error in code']
@@ -117,13 +118,14 @@ def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0.
 
 
 
-def BCPy(JDUTC,ra=0.0,dec=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
-    pmdec=0.0,px=0.0,rv=0.0,zmeas=0.0,ephemeris='de430',leap_dir=os.path.dirname(__file__),leap_update = True ) :
-
+def BCPy(JDUTC,
+    ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmdec=0.0, px=0.0, rv=0.0, zmeas=0.0,
+    loc=None,
+    ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
-    See get_BC_vel() for parameter description
+    See get_BC_vel() for parameter description.
     
     '''
     
@@ -137,14 +139,14 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
     M_earth = u.M_earth.value
     M_sun = u.M_sun.value
     
-    # Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn , Uranus , Neptune, Moon
+    # Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon
     GM = [const.G*x for x in [M_sun, 0.3301e24, 4.867e24, M_earth, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon]]
     
     # Convert times to obtain TDB and TT
     JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
     
     
-    ##### NUTATION , PRECESSION , ETC. #####
+    ##### NUTATION, PRECESSION, ETC. #####
     
     r_pint, v_pint = PINT.gcrs_posvel_from_itrf(loc, JDUTC, JDTT)
     
@@ -164,7 +166,9 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
     
     ##### Convert Star RA DEC to R0hat vector #####
     
-    r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.), math.sin(ra*np.pi/180.)*math.cos(dec*np.pi/180.), math.sin(dec*np.pi/180.)])
+    r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
+                      math.sin(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
+                                              math.sin(dec*np.pi/180.)])
     # Eq 14 to 17
     up = [0., 0., 1.]
     east = np.cross(up, r0hat)
@@ -218,7 +222,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
         
         # Add Shapiro Delay
         a = np.dot((rhohat-np.dot(Xhat,rhohat)*Xhat), beta_earth)
-        zshapiro += -2.*GM[i]*a / ((c*c)*(Xmag*(1+np.dot(Xhat, rhohat))))   # Eq 27
+        zshapiro += -2.*GM[i]*a / ((c*c)*Xmag*(1+np.dot(Xhat, rhohat)))   # Eq 27
         
         if Xmag!=0.:
             Sum_GR += GM[i]/Xmag  # [(m/s)^2]
@@ -226,7 +230,7 @@ def BCPy(JDUTC,ra=0.0,dec=0.0,loc=0.0,epoch=2451545.0,pmra=0.0,
     zgravity = 1./(1+Sum_GR/(c*c)) - 1
     
     
-    ##### Determine the Barycentric RV correction (eq 28) #####
+    ##### Determine the Barycentric RV correction (Eq 28) #####
     
     gamma_earth = 1. / math.sqrt(1.-sum(beta_earth**2))
     
