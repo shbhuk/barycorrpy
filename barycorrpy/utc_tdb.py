@@ -165,7 +165,6 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=os.path.dirname(__file__)):
     Convert JDUTC to JDTDB
     INPUT:
         utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
-    
         fpath : Path to where the file would be saved. Default is script directory.
         leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.
                       If False, then will just give a warning message.  Default is True.   
