@@ -19,19 +19,7 @@ from . import utc_tdb
 ### Need to install jplephem ###
 #de430 is 100 MB in size
 
-def constants():
-    # Parsing constants #
-    AU = const.astronomical_unit # 1 AU in meters
-    c = const.c # Speed of light [m/s]
-    pctoau = 3600*180/np.pi # No. of AU in one parsec
-    year = 365.25*3600*24 # 1 year in seconds
-    kmstoauyr = year/(1000*AU)
-    
-    M_moon = 73476730924573500000000 # Mass of the Moon [kg]
-    M_earth = u.M_earth.value # [kg]
-    M_sun = u.M_sun.value # [kg] 
-    
-    return AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun
+
 
 
 def get_BC_vel(JDUTC,
@@ -65,15 +53,15 @@ def get_BC_vel(JDUTC,
         ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
                     For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
                     ['de432s','de430',
-                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
-                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
+                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
+                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                    If False, then will just give a warning message. Default is True.
+                      If False, then will just give a warning message. Default is True.
     
     OUTPUT:
         vel:The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
-        warning, error : Warning and Error message from the routine
+        warning : Warning and Error message from the routine
         status : Status regarding warning and error message. Returns the following -
                 0 - No warning or error.
                 1 - Warning message.
@@ -249,7 +237,75 @@ def BCPy(JDUTC,
     
     return v_final, warning, error
 
+def constants():
+    # Parsing constants #
+    AU = const.astronomical_unit # 1 AU in meters
+    c = const.c # Speed of light [m/s]
+    pctoau = 3600*180/np.pi # No. of AU in one parsec
+    year = 365.25*3600*24 # 1 year in seconds
+    kmstoauyr = year/(1000*AU)
+    
+    M_moon = 73476730924573500000000 # Mass of the Moon [kg]
+    M_earth = u.M_earth.value # [kg]
+    M_sun = u.M_sun.value # [kg] 
+    
+    return AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun
+    
 
+def exposure_meter_BC_vel(JDUTC,expmeterflux,
+       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
+       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
+       ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
+            
+    '''
+    Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time. 
+    Enter JDUTC and expmeterflux from exposure meter readings to calculate barycentric velocity correction for exposure. 
+    
+    INPUT: 
+        JDUTC : Can enter multiple times in Astropy Time object.In UTC Scale. 
+        expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
+                       The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2013)
+       
+                     
+    See get_BC_vel() for parameter description of the rest of the parameters.
+       
+    OUTPUT:
+        weighted_vel : The barycenter-corrected RV (m/s) for the exposure as defined in Wright & Eastman, 2014. 
+        JDUTCMID : The flux weighted midpoint time is returned. 
+        warning : Warning and Error message from the routine
+        status : Status regarding warning and error message. Returns the following -
+                0 - No warning or error.
+                1 - Warning message.
+                2 - Error message.
+        
+    '''
+    
+    expmeterflux=np.array(expmeterflux)
+    
+    
+    ## Check for size of Flux Array ##
+    error=[]
+    if len(JDUTC)!=len(expmeterflux):
+        error=['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
+        
+    
+    ## Calculate barycentric velocity at each instance of exposure meter reading ##        
+    vel, warning, status = get_BC_vel(JDUTC=JDUTC,
+                                            hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                            obsname=obsname,lat=lat,longi=longi,alt=alt,
+                                            rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)
+                                            
+
+    ## Weight it by flux ##
+    weighted_vel = sum(vel*expmeterflux) / sum(expmeterflux)
+
+    JD0 = min(JDUTC)
+    JDUTCMID = (sum(expmeterflux*(JDUTC-JD0))/sum(expmeterflux)) + JD0
+    
+    if error:
+        status = 2
+    
+    return weighted_vel,JDUTCMID,warning+error,status
 
 
 
