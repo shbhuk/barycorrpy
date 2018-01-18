@@ -19,8 +19,23 @@ from . import utc_tdb
 ### Need to install jplephem ###
 #de430 is 100 MB in size
 
+def constants():
+    # Parsing constants #
+    AU = const.astronomical_unit # 1 AU in meters
+    c = const.c # Speed of light [m/s]
+    pctoau = 3600*180/np.pi # No. of AU in one parsec
+    year = 365.25*3600*24 # 1 year in seconds
+    kmstoauyr = year/(1000*AU)
+    
+    M_moon = 73476730924573500000000 # Mass of the Moon [kg]
+    M_earth = u.M_earth.value # [kg]
+    M_sun = u.M_sun.value # [kg] 
+    
+    return AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun
 
-def get_BC_vel(JDUTC, hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
+
+def get_BC_vel(JDUTC,
+       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
        obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
     '''
@@ -129,15 +144,9 @@ def BCPy(JDUTC,
     
     '''
     
-    AU = const.astronomical_unit # 1 AU in meters
-    c = const.c # Speed of light [m/s]
-    pctoau = 3600*180/np.pi # No. of AU in one parsec
-    year = 365.25*3600*24 # 1 year in seconds
-    kmstoauyr = year/(1000*AU)
+
     
-    M_moon = 73476730924573500000000 # Mass of the Moon [kg]
-    M_earth = u.M_earth.value
-    M_sun = u.M_sun.value
+    AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun=constants()
     
     # Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon
     GM = [const.G*x for x in [M_sun, 0.3301e24, 4.867e24, M_earth, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon]]
@@ -188,7 +197,7 @@ def BCPy(JDUTC,
     r = r0hat + vel*T                              # [rad]    (p1 in AA)
     rhat = r / math.sqrt(sum(r*r))
     
-    # Parallax correction
+    # Parallax correction #
     if px>0:
         rho = 1000.*rhat/px*pctoau - r_obs/AU # [AU]
         rhohat = rho / math.sqrt(sum(rho*rho)) # Unitless
@@ -239,5 +248,8 @@ def BCPy(JDUTC,
     
     
     return v_final, warning, error
+
+
+
 
 
