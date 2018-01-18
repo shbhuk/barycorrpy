@@ -1,7 +1,6 @@
 from __future__ import print_function
 from .barycorrpy import get_BC_vel 
 from astropy.time import Time
-import datetime
 
 def run_sample():
             JDUTC = Time(2458000,format='jd',scale='utc')

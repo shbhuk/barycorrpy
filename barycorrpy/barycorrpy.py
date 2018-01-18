@@ -19,7 +19,56 @@ from . import utc_tdb
 ### Need to install jplephem ###
 #de430 is 100 MB in size
 
+def exposure_meter_BC_vel(JDUTC,expmeterflux,
+       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
+       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
+       ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
+            
+    '''
+    Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time. 
+    Enter JDUTC and expmeterflux from exposure meter readings to calculate barycentric velocity correction for exposure. 
+    
+    INPUT: 
+        JDUTC : Can enter multiple times in Astropy Time object.In UTC Scale. 
+        expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
+                       The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2013)
+       
+                     
+    See get_BC_vel() for parameter description of the rest of the parameters.
+       
+    OUTPUT:
+        weighted_vel : The barycenter-corrected RV (m/s) for the exposure as defined in Wright & Eastman, 2014. 
+        JDUTCMID : The flux weighted midpoint time is returned. 
+        warning : Warning and Error message from the routine
+        status : Status regarding warning and error message. Returns the following -
+                0 - No warning or error.
+                1 - Warning message.
+                2 - Error message.
+        
+    '''
+    
+    expmeterflux=np.array(expmeterflux)
+    
+    
+    ## Check for size of Flux Array ##
 
+    if len(JDUTC)!=len(expmeterflux):
+        print('Error: Size of JDUTC array is not equal to expmeterflux (Flux) array')
+        
+    
+    ## Calculate barycentric velocity at each instance of exposure meter reading ##        
+    vel, warning, status = get_BC_vel(JDUTC=JDUTC,
+                                            hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                            obsname=obsname,lat=lat,longi=longi,alt=alt,
+                                            rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)                                        
+
+    ## Weight it by flux ##
+    weighted_vel = sum(vel*expmeterflux) / sum(expmeterflux)
+    JDUTC=JDUTC.jd
+    JD0 = min(JDUTC)
+    JDUTCMID = (sum(expmeterflux*(JDUTC-JD0))/sum(expmeterflux)) + JD0
+
+    return weighted_vel,JDUTCMID,warning,status
 
 
 def get_BC_vel(JDUTC,
@@ -252,60 +301,7 @@ def constants():
     return AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun
     
 
-def exposure_meter_BC_vel(JDUTC,expmeterflux,
-       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
-       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
-       ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
-            
-    '''
-    Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time. 
-    Enter JDUTC and expmeterflux from exposure meter readings to calculate barycentric velocity correction for exposure. 
-    
-    INPUT: 
-        JDUTC : Can enter multiple times in Astropy Time object.In UTC Scale. 
-        expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
-                       The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2013)
-       
-                     
-    See get_BC_vel() for parameter description of the rest of the parameters.
-       
-    OUTPUT:
-        weighted_vel : The barycenter-corrected RV (m/s) for the exposure as defined in Wright & Eastman, 2014. 
-        JDUTCMID : The flux weighted midpoint time is returned. 
-        warning : Warning and Error message from the routine
-        status : Status regarding warning and error message. Returns the following -
-                0 - No warning or error.
-                1 - Warning message.
-                2 - Error message.
-        
-    '''
-    
-    expmeterflux=np.array(expmeterflux)
-    
-    
-    ## Check for size of Flux Array ##
-    error=[]
-    if len(JDUTC)!=len(expmeterflux):
-        error=['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
-        
-    
-    ## Calculate barycentric velocity at each instance of exposure meter reading ##        
-    vel, warning, status = get_BC_vel(JDUTC=JDUTC,
-                                            hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
-                                            obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                            rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)
-                                            
 
-    ## Weight it by flux ##
-    weighted_vel = sum(vel*expmeterflux) / sum(expmeterflux)
-
-    JD0 = min(JDUTC)
-    JDUTCMID = (sum(expmeterflux*(JDUTC-JD0))/sum(expmeterflux)) + JD0
-    
-    if error:
-        status = 2
-    
-    return weighted_vel,JDUTCMID,warning+error,status
 
 
 
