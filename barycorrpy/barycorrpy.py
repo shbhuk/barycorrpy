@@ -22,7 +22,7 @@ from . import utc_tdb
 def exposure_meter_BC_vel(JDUTC,expmeterflux,
        hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
        obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
-       ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
+       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
             
     '''
     Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time. 
@@ -74,7 +74,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
 def get_BC_vel(JDUTC,
        hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
        obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
-       ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
+       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values)
@@ -173,7 +173,7 @@ def get_BC_vel(JDUTC,
 def BCPy(JDUTC,
     ra=0.0, dec=0.0, epoch=2451545.0, pmra=0.0, pmdec=0.0, px=0.0, rv=0.0, zmeas=0.0,
     loc=None,
-    ephemeris='de430', leap_dir=os.path.dirname(__file__), leap_update=True):
+    ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     
