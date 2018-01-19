@@ -38,7 +38,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
     See get_BC_vel() for parameter description of the rest of the parameters.
        
     OUTPUT:
-        weighted_vel : The barycenter-corrected RV (m/s) for the exposure as defined in Wright & Eastman, 2014. 
+        weighted_vel : The barycenter-corrected RV (m/s) for the exposure as weighted by the flux from the exposure meter as defined in Wright & Eastman, 2014. 
         JDUTCMID : The flux weighted midpoint time is returned. 
         warning : Warning and Error message from the routine
         status : Status regarding warning and error message. Returns the following -
@@ -130,12 +130,13 @@ def get_BC_vel(JDUTC,
     error = []
     status = 0
     
-        
+    # Check for JDUTC type   
     if type(JDUTC)!=Time:
          warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
          JDUTC=Time(JDUTC,format='jd',scale='utc')
-    
-    
+
+    if JDUTC.isscalar:
+        JDUTC = Time([JDUTC])    
     
     # Notify user if both Hipparcos ID and positional data is given.
     if isinstance(hip_id, int) and (hip_id > 0):
@@ -153,8 +154,6 @@ def get_BC_vel(JDUTC,
     else: 
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
-    if JDUTC.isscalar:
-        JDUTC = Time([JDUTC])
 
     for jdutc in JDUTC:
         a = BCPy(JDUTC=jdutc,
