@@ -30,6 +30,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
     
     INPUT: 
         JDUTC : Can enter multiple times in Astropy Time object.In UTC Scale. 
+                Can also accept list of float JDUTC times. Be cautious about scale used. 
         expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
                        The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2013)
        
@@ -46,7 +47,6 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
                 2 - Error message.
         
     '''
-    
     expmeterflux=np.array(expmeterflux)
     
     
@@ -80,7 +80,8 @@ def get_BC_vel(JDUTC,
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values)
     
     INPUT:
-        JDUTC : Can enter multiple times in Astropy Time object. Will loop through and find barycentric velocity correction corresponding to those times. In UTC Scale.
+        JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times. 
+                In UTC Scale. If using float, be careful about format and scale used.
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
                                 OR
@@ -128,6 +129,12 @@ def get_BC_vel(JDUTC,
     warning = []
     error = []
     status = 0
+    
+        
+    if type(JDUTC)!=Time:
+         warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
+         JDUTC=Time(JDUTC,format='JD',scale='utc')
+    
     
     
     # Notify user if both Hipparcos ID and positional data is given.
