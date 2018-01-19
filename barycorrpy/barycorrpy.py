@@ -133,7 +133,7 @@ def get_BC_vel(JDUTC,
         
     if type(JDUTC)!=Time:
          warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
-         JDUTC=Time(JDUTC,format='JD',scale='utc')
+         JDUTC=Time(JDUTC,format='jd',scale='utc')
     
     
     
