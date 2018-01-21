@@ -2,7 +2,6 @@ from __future__ import division
 from __future__ import print_function
 #import de423    #https://pypi.python.org/pypi/jplephem
 from astropy.coordinates import EarthLocation
-from astropy.coordinates import solar_system_ephemeris
 from astropy.coordinates import get_body_barycentric_posvel, get_body_barycentric
 from astropy.time import Time
 import math
@@ -19,11 +18,22 @@ from . import utc_tdb
 ### Need to install jplephem ###
 #de430 is 100 MB in size
 
-def exposure_meter_BC_vel(JDUTC,expmeterflux,
-       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
-       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
-       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
-            
+# Parsing constants #
+AU = const.astronomical_unit # [m]
+c = const.c # Speed of light [m/s]
+pctoau = 3600*180/np.pi # No. of AU in one parsec
+year = 365.25*3600*24 # [s]
+kmstoauyr = year/(1000*AU)
+
+M_moon = 73476730924573500000000 # Mass of the Moon [kg]
+
+# Mass and normalised mass of solar system bodies
+ss_bodies = ['Sun', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Moon']
+M = dict(zip(ss_bodies, [u.M_sun.value, 0.3301e24, 4.867e24, u.M_earth.value, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon])) # [kg]
+GM = {k:const.G*M[k] for k in ss_bodies}
+
+
+def exposure_meter_BC_vel(JDUTC, expmeterflux, **kwargs):
     '''
     Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time. 
     Enter JDUTC and expmeterflux from exposure meter readings to calculate barycentric velocity correction for exposure. 
@@ -47,29 +57,23 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
                 2 - Error message.
         
     '''
-    expmeterflux=np.array(expmeterflux)
-    
+    expmeterflux = np.array(expmeterflux)
     
     ## Check for size of Flux Array ##
-
     if len(JDUTC)!=len(expmeterflux):
         print('Error: Size of JDUTC array is not equal to expmeterflux (Flux) array')
-        
     
     ## Calculate barycentric velocity at each instance of exposure meter reading ##        
-    vel, warning, status = get_BC_vel(JDUTC=JDUTC,
-                                            hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
-                                            obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                            rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)                                        
+    vel, warning, status = get_BC_vel(JDUTC=JDUTC, **kwargs)
 
     ## Weight it by flux ##
     weighted_vel = sum(vel*expmeterflux) / sum(expmeterflux)
-    JDUTC=JDUTC.jd
+    JDUTC = JDUTC.jd
     JD0 = min(JDUTC)
-    JDUTCMID = (sum(expmeterflux*(JDUTC-JD0))/sum(expmeterflux)) + JD0
+    JDUTCMID = sum(expmeterflux*(JDUTC-JD0))/sum(expmeterflux) + JD0
 
-    return weighted_vel,JDUTCMID,warning,status
-
+    return weighted_vel, JDUTCMID, warning, status
+ 
 
 def get_BC_vel(JDUTC,
        hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
@@ -77,7 +81,7 @@ def get_BC_vel(JDUTC,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
-    Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values)
+    Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values).
     
     INPUT:
         JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times. 
@@ -85,17 +89,17 @@ def get_BC_vel(JDUTC,
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
                                 OR
-        ra, dec : RA and Dec of star [degrees]
+        ra, dec : RA and Dec of star [degrees].
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.
         pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
         pmdec : Proper motion in Dec [mas/year]. Default is 0.
-        px : Parallax of target [MAS]. Default is 0.
+        px : Parallax of target [mas]. Default is 0.
         
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
                   If obsname is not used, then can enter lat,long,alt.
                                 OR
-        lat : Latitude of observatory in [degrees]. North (+ve) and South (-ve)
-        longi : Longitude of observatory [degrees]. East (+ve) and West (-ve)
+        lat : Latitude of observatory in [degrees]. North (+ve) and South (-ve).
+        longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
         alt : Altitude of observatory [m].
         
         rv : Radial Velocity of Target [m/s]. Default is 0.
@@ -110,8 +114,8 @@ def get_BC_vel(JDUTC,
                       If False, then will just give a warning message. Default is True.
     
     OUTPUT:
-        vel:The barycenter-corrected RV (m/s) as defined in Wright & Eastman, 2014.
-        warning : Warning and Error message from the routine
+        vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014.
+        warning : Warning and Error message from the routine.
         status : Status regarding warning and error message. Returns the following -
                 0 - No warning or error.
                 1 - Warning message.
@@ -133,13 +137,13 @@ def get_BC_vel(JDUTC,
     # Check for JDUTC type   
     if type(JDUTC)!=Time:
          warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
-         JDUTC=Time(JDUTC,format='jd',scale='utc')
+         JDUTC=Time(JDUTC, format='jd', scale='utc')
 
     if JDUTC.isscalar:
-        JDUTC = Time([JDUTC])    
+        JDUTC = Time([JDUTC])
     
     # Notify user if both Hipparcos ID and positional data is given.
-    if isinstance(hip_id, int) and (hip_id > 0):
+    if hip_id:
         if any([ra, dec, px, pmra, pmdec, epoch-2451545.]):
             warning += [['Warning: Taking stellar positional data from Hipparcos Catalogue']]
         
@@ -166,14 +170,13 @@ def get_BC_vel(JDUTC,
     
 
     # Status messages to check for warning or error
+    if not all(vel): error += ['Check inputs. Error in code']
     if any(error):   status |= 2
     if any(warning): status |= 1
-    if vel==0: error += ['Check inputs. Error in code']
     # Convert velocity from list to numpy array
     vel = np.array(vel)
     
     return vel, warning+error, status
-
 
 
 def BCPy(JDUTC,
@@ -186,17 +189,9 @@ def BCPy(JDUTC,
     See get_BC_vel() for parameter description.
     
     '''
-    
-
-    
-    AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun=constants()
-    
-    # Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon
-    GM = [const.G*x for x in [M_sun, 0.3301e24, 4.867e24, M_earth, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon]]
-    
+   
     # Convert times to obtain TDB and TT
     JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
-    
     
     ##### NUTATION, PRECESSION, ETC. #####
     
@@ -213,9 +208,8 @@ def BCPy(JDUTC,
     
     # Relativistic Addition of Velocities
     v_obs = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
-    beta_earth = v_obs/c
-    
-    
+    beta_earth = v_obs / c
+
     ##### Convert Star RA DEC to R0hat vector #####
     
     r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
@@ -256,15 +250,12 @@ def BCPy(JDUTC,
 
     
     ##### Calculate Gravitaional Redshift due to Solar system bodies #####
-    
-    bodies = solar_system_ephemeris.bodies
-    ss_bodies = [bodies[i] for i in [1, 3, 4, 0, 6, 7, 8, 9, 10, 2]]   # Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon
-    
+        
     Sum_GR = 0.
     zshapiro = 0.
     
-    for i in range(len(ss_bodies)):
-        jplephem = get_body_barycentric(ss_bodies[i], JDTDB, ephemeris=ephemeris)
+    for ss_body in ss_bodies:
+        jplephem = get_body_barycentric(ss_body, JDTDB, ephemeris=ephemeris)
         pos_obj = jplephem.xyz.value*1000. # [m]
         
         # Vector from object barycenter to Observatory
@@ -274,10 +265,10 @@ def BCPy(JDUTC,
         
         # Add Shapiro Delay
         a = np.dot((rhohat-np.dot(Xhat,rhohat)*Xhat), beta_earth)
-        zshapiro += -2.*GM[i]*a / ((c*c)*Xmag*(1+np.dot(Xhat, rhohat)))   # Eq 27
+        zshapiro += -2.*GM[ss_body]*a / ((c*c)*Xmag*(1+np.dot(Xhat, rhohat)))   # Eq 27
         
         if Xmag!=0.:
-            Sum_GR += GM[i]/Xmag  # [(m/s)^2]
+            Sum_GR += GM[ss_body] / Xmag  # [(m/s)^2]
         
     zgravity = 1./(1+Sum_GR/(c*c)) - 1
     
@@ -293,21 +284,7 @@ def BCPy(JDUTC,
     return v_final, warning, error
 
 def constants():
-    # Parsing constants #
-    AU = const.astronomical_unit # 1 AU in meters
-    c = const.c # Speed of light [m/s]
-    pctoau = 3600*180/np.pi # No. of AU in one parsec
-    year = 365.25*3600*24 # 1 year in seconds
-    kmstoauyr = year/(1000*AU)
-    
-    M_moon = 73476730924573500000000 # Mass of the Moon [kg]
-    M_earth = u.M_earth.value # [kg]
-    M_sun = u.M_sun.value # [kg] 
-    
-    return AU,c,pctoau,year,kmstoauyr,M_moon,M_earth,M_sun
-    
-
-
+    pass    
 
 
 
