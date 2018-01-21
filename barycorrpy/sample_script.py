@@ -4,7 +4,7 @@ from astropy.time import Time
 import datetime
 
 def run_sample():
-            JDUTC = Time(2458000,format='jd',scale='utc')
+            JDUTC = 2458000 # Also accepts float input for JDUTC. Verify scale and format
             
             # Observation of Tau Ceti taken from CTIO on JD 2458000. 
             # Observatory location manually entered. Stellar positional parameters taken from Hipparcos Catalogue
@@ -13,7 +13,7 @@ def run_sample():
             
             # Observation of Tau Ceti taken from CTIO on JD 2458000. Observatory location taken from Astropy list. 
             # Stellar positional parameters taken from Hipparcos Catalogue
-            
+            JDUTC = Time(2458000,format='jd',scale='utc')
             result2  = get_BC_vel(JDUTC=JDUTC,hip_id=8102,obsname='CTIO',ephemeris='de430')
             
             # Observation of Tau Ceti taken from CTIO on JD 2458000,2458010,2458020. 
