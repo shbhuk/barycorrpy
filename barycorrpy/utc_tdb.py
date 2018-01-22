@@ -178,15 +178,21 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(_
         
 
     '''
+
     JDUTC=utctime.jd
     if JDUTC<2441317.5 : 
-        return utctime.tdb,utctime.tt,['WARNING : JD = '+str(utctime.jd)+' :  Precise leap second history is not maintained here for before 1972. Defaulting to Astropy. Corrections maybe inaccurate'],[]
+        return utctime.tdb,utctime.tt,['WARNING : JD = '+str(utctime.jd)+' :  Precise leap second history is not maintained here for before 1972. Defaulting to Astropy for time conversion. Corrections maybe inaccurate.'],[]
 
     # Call function to check leap second file and find offset between UTC and TAI. 
     tai_utc,warning,error=leap_manage(utctime=utctime,fpath=fpath,leap_update=leap_update)
     
+    if utctime.scale != 'utc':
+        error+['ERROR : JD = '+str(utctime.jd)+' : Please input time in UTC scale']
+        if utctime.scale == 'tdb':
+            return utctime.tdb,utctime.tt,['WARNING : JD = '+str(utctime.jd)+' :  UTC Time scale not used. Defaulting to Astropy for time conversion. Corrections maybe inaccurate.'],[]
+    
     if tai_utc==0:
-        return utctime.tdb,utctime.tt,warning,error+['ERROR : JD = '+str(utctime.jd)+' :  Unable to maintain leap second file. Defaulting to AstroPy version']        
+        return utctime.tdb,utctime.tt,warning,error+['ERROR : JD = '+str(utctime.jd)+' :  Unable to maintain leap second file. Defaulting to AstroPy version of leap seconds.']        
 
     check_time=utctime.datetime
     
