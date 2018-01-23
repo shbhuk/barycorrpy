@@ -30,8 +30,15 @@ M_moon = 73476730924573500000000 # Mass of the Moon [kg]
 # Mass and normalised mass of solar system bodies
 ss_bodies = ['Sun', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Moon']
 M = dict(zip(ss_bodies, [u.M_sun.value, 0.3301e24, 4.867e24, u.M_earth.value, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon])) # [kg]
+
+#Reduced number of bodies, to increase spped. Does not affect precision at 1 cm/s level
+ss_bodies = ['Sun','Earth', 'Jupiter', 'Saturn', 'Uranus', 'Neptune']
+M = dict(zip(ss_bodies, [u.M_sun.value, u.M_earth.value, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24])) # [kg]
 GM = {k:const.G*M[k] for k in ss_bodies}
 
+
+
+GM = {k:const.G*M[k] for k in ss_bodies}
 
 
 
@@ -260,7 +267,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
         JDUTC : Can enter multiple times in Astropy Time object.In UTC Scale. 
                 Can also accept list of float JDUTC times. Be cautious about scale used. 
         expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
-                       The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2013)
+                       The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2014)
        
                      
     See get_BC_vel() for parameter description of the rest of the parameters.
