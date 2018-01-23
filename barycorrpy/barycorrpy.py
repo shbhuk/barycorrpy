@@ -32,8 +32,8 @@ ss_bodies = ['Sun', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'U
 M = dict(zip(ss_bodies, [u.M_sun.value, 0.3301e24, 4.867e24, u.M_earth.value, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon])) # [kg]
 
 #Reduced number of bodies, to increase speed. Does not affect precision at 1 cm/s level
-ss_bodies = ['Sun','Earth']
-M = dict(zip(ss_bodies, [u.M_sun.value, u.M_earth.value])) # [kg]
+ss_bodies = ['Sun','Earth','Jupiter','Saturn']
+M = dict(zip(ss_bodies, [u.M_sun.value, u.M_earth.value,u.M_jup.value,568.5e24])) # [kg]
 
 GM = {k:const.G*M[k] for k in ss_bodies}
 
