@@ -215,8 +215,11 @@ def BCPy(JDUTC,
     zshapiro = 0.
     
     for ss_body in ss_bodies:
-        jplephem = get_body_barycentric(ss_body, JDTDB, ephemeris=ephemeris)
-        pos_obj = jplephem.xyz.value*1000. # [m]
+        if ss_body == 'Earth':
+            pos_obj = earth_geo[0].xyz.value*1000. # [m]
+        else:
+            jplephem = get_body_barycentric(ss_body, JDTDB, ephemeris=ephemeris)
+            pos_obj = jplephem.xyz.value*1000. # [m]
         
         # Vector from object barycenter to Observatory
         X = np.array(r_obs-pos_obj)
