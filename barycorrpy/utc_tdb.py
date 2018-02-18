@@ -278,8 +278,8 @@ def JDUTC_to_BJDTDB(JDUTC,
     Example:
     >>> from astropy.time import Time
     >>> JDUTC = Time(2458000, format='jd', scale='utc')
-    >>> get_BC_vel(JDUTC, hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9)
-    (array([15403.95089287]), [[], []], 0)
+    >>> utc_tdb.JDUTC_to_BJDTDB(JDUTC,hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9)
+    (array([ 2458000.00505211]), [[], []], 0)
 
     '''
        
