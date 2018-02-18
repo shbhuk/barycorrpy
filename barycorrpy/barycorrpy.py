@@ -188,7 +188,7 @@ def BCPy(JDUTC,
     mu = (pmra*east+pmdec*north)/pctoau/1000 # Divided by 1000 since the Proper motion is in milli-arcseconds.
     
     
-    ##### Stellar position at each time #####
+    ##### Stellar position corrected for motion #####
     
     epoch0 = 2000. + (epoch-2451545.)/365.25
     yearnow = 2000. + (JDTDB.jd-2451545.)/365.25
