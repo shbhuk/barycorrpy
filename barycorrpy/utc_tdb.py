@@ -347,8 +347,7 @@ def _JDUTC_to_BJDTDB(JDUTC,
     '''
     
     # Convert times to obtain TDB and TT
-    #JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
-    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC, leap_update=leap_update)
+    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
     clock_corr = (JDTDB.jd - JDUTC.jd) * 86400.
         
     ##### NUTATION, PRECESSION, ETC. #####
