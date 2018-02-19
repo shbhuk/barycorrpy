@@ -2,7 +2,7 @@ from __future__ import print_function
 from .barycorrpy import get_BC_vel , exposure_meter_BC_vel
 from . import utc_tdb
 from astropy.time import Time
-import datetime
+
 
 def run_sample():
             JDUTC = 2458000 # Also accepts float input for JDUTC. Verify scale and format
