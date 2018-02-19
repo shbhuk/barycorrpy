@@ -1,5 +1,6 @@
 from __future__ import print_function
 from .barycorrpy import get_BC_vel , exposure_meter_BC_vel
+from . import utc_tdb
 from astropy.time import Time
 import datetime
 
@@ -47,5 +48,7 @@ def run_sample():
             result4,JDUTCMID,warning4,status4=exposure_meter_BC_vel(JDUTC=JDUTC,expmeterflux = flux, ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
                 pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_update=True)
 
-        
-            return result,result2,result3,result4,JDUTCMID,warning4,status4
+            # JDUTC to BJDTDB time converter
+            corr_time = utc_tdb.JDUTC_to_BJDTDB(JDUTC,hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9)
+
+            return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time
