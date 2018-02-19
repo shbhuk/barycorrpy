@@ -1,5 +1,5 @@
 from __future__ import print_function
-from .barycorrpy import get_BC_vel 
+from .barycorrpy import get_BC_vel , exposure_meter_BC_vel
 from astropy.time import Time
 import datetime
 
@@ -32,14 +32,20 @@ def run_sample():
             px = 273.96 
             rv = 0.0 
             zmeas=0.0
-            JDUTC=Time([2458000,2458010,2458020],format='jd',scale='utc')
+            JDUTC=[2458000,2458000.00001,2458000.00002] # Can also enter JDUTC as float instead of Astropy Time Object
             ephemeris='https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp'
             
-            result3,warning3,flag3=get_BC_vel(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
+            result3=get_BC_vel(JDUTC=JDUTC,ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
                 pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_update=True)
-                
-            if warning3:
-                print('Check ')
+                                
+            if result3[2]:
+                print('Check ')   
+                        
+            # Exposure meter calculation
+            flux = [4.5,1.5,2] # Same number of elements as JDUTC
+                        
+            result4,JDUTCMID,warning4,status4=exposure_meter_BC_vel(JDUTC=JDUTC,expmeterflux = flux, ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
+                pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_update=True)
+
         
-        
-            return result,result2,result3,warning3,flag3
+            return result,result2,result3,result4,JDUTCMID,warning4,status4

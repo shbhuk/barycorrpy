@@ -281,22 +281,38 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
         
     '''
     expmeterflux = np.array(expmeterflux)
+    error = []
+
     
-    ## Check for size of Flux Array ##
+
+    if isinstance(JDUTC,(int,float)):
+        JDUTC = np.array([JDUTC])
+        
+    ## Check for size of Flux Array ##    
     if len(JDUTC)!=len(expmeterflux):
         print('Error: Size of JDUTC array is not equal to expmeterflux (Flux) array')
+        error+=['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
+
     
     ## Calculate barycentric velocity at each instance of exposure meter reading ##        
-    vel, warning, status = get_BC_vel(JDUTC=JDUTC,
-                                            hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
-                                            obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                            rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)    
+    vel,warning,status = get_BC_vel(JDUTC=JDUTC,
+                                hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                obsname=obsname,lat=lat,longi=longi,alt=alt,
+                                rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)   
 
     ## Weight it by flux ##
     weighted_vel = sum(vel*expmeterflux) / sum(expmeterflux)
-    JDUTC = JDUTC.jd
+    try:
+        JDUTC = JDUTC.jd
+    except:
+        JDUTC = np.array(JDUTC)
     JD0 = min(JDUTC)
     JDUTCMID = sum(expmeterflux*(JDUTC-JD0))/sum(expmeterflux) + JD0
+    
+    # Error handling
+    if error:
+        warning.append(error)
+        status = 2
 
     return weighted_vel, JDUTCMID, warning, status
 
