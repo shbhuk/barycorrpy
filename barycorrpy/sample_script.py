@@ -45,7 +45,8 @@ def run_sample():
             # Exposure meter calculation
             flux = [4.5,1.5,2] # Same number of elements as JDUTC
                         
-            result4,JDUTCMID,warning4,status4=exposure_meter_BC_vel(JDUTC=JDUTC,expmeterflux = flux, ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
+            result4,JDUTCMID,warning4,status4=exposure_meter_BC_vel(JDUTC=JDUTC,expmeterflux = flux,
+                ra=ra,dec=dec,obsname=obsname,lat=lat,longi=longi,alt=alt,pmra=pmra,
                 pmdec=pmdec,px=px,rv=rv,zmeas=zmeas,epoch=epoch,ephemeris=ephemeris,leap_update=True)
 
             # JDUTC to BJDTDB time converter
