@@ -67,8 +67,10 @@ def get_BC_vel(JDUTC,
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
         alt : Altitude of observatory [m].
         
-        rv : Radial Velocity of Target [m/s]. Default is 0.
-        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
+        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV of the target at the ~100 km/s precision.
+             Can be ignored for most targets but for high velocity stars.
+        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). 
+                The redshift measured by the spectrograph before any barycentric correction. Default is 0.
         ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
                     For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
                     ['de432s','de430',
@@ -104,8 +106,15 @@ def get_BC_vel(JDUTC,
          warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
          JDUTC=Time(JDUTC, format='jd', scale='utc')
 
+    #if isinstance(zmeas,(int,float)):
+    #    zmeas=[zmeas]
+        
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
+    #else:
+    #   if isinstance(zmeas,(int,float)):
+    #      error+= [['Error: JDUTC is a vector, zmeas must also be a vector corresponding to those dates. See documentation for zmeas']]
+
     
     # Notify user if both Hipparcos ID and positional data is given.
     if hip_id:
