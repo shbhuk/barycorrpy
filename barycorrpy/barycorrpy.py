@@ -67,21 +67,27 @@ def get_BC_vel(JDUTC,
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
         alt : Altitude of observatory [m].
         
-        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV of the target at the ~100 km/s precision.
-             Can be ignored for most targets but for high velocity stars.
-        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). 
-                The redshift measured by the spectrograph before any barycentric correction. Default is 0.
+        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV (systemic) of the target at the ~100 km/s precision.
+             Can be ignored for most targets but for high velocity stars. This does not include the barycentric velocity and is 
+             only required to correct for proper motion and secular acceleration.
+        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
+                The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric 
+                velocity of the observatory.
         ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
                     For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
                     ['de432s','de430',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
-        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is 
+        script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
     
     OUTPUT:
-        vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014.
+        vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014. 
+        NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
+            The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
+            required. This matters at ~ m/s level and hence must be included.
         warning : Warning and Error message from the routine.
         status : Status regarding warning and error message. Returns the following -
                 0 - No warning or error.
@@ -273,12 +279,44 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
                 Can also accept list of float JDUTC times. Be cautious about scale used. 
         expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
                        The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2014)
-       
-                     
-    See get_BC_vel() for parameter description of the rest of the parameters.
+        hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
+                If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
+                                OR
+        ra, dec : RA and Dec of star [degrees].
+        epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.
+        pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
+        pmdec : Proper motion in Dec [mas/year]. Default is 0.
+        px : Parallax of target [mas]. Default is 0.
+        
+        obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
+                  If obsname is not used, then can enter lat,long,alt.
+                                OR
+        lat : Latitude of observatory in [degrees]. North (+ve) and South (-ve).
+        longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
+        alt : Altitude of observatory [m].
+        
+        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV (systemic) of the target at the ~100 km/s precision.
+             Can be ignored for most targets but for high velocity stars. This does not include the barycentric velocity and is 
+             only required to correct for proper motion and secular acceleration.
+        zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
+                The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric 
+                velocity of the observatory.
+        ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
+                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
+                    ['de432s','de430',
+                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
+                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is 
+        script directory.
+        leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
+                      If False, then will just give a warning message. Default is True.
+
        
     OUTPUT:
         weighted_vel : The barycenter-corrected RV (m/s) for the exposure as weighted by the flux from the exposure meter as defined in Wright & Eastman, 2014. 
+                NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
+                The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
+                required. This matters at ~ m/s level and hence must be included.
         JDUTCMID : The flux weighted midpoint time is returned. 
         warning : Warning and Error message from the routine
         status : Status regarding warning and error message. Returns the following -
