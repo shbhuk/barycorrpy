@@ -105,15 +105,13 @@ def get_BC_vel(JDUTC,
     if type(JDUTC)!=Time:
          warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
          JDUTC=Time(JDUTC, format='jd', scale='utc')
-
-    #if isinstance(zmeas,(int,float)):
-    #    zmeas=[zmeas]
-        
+       
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
-    #else:
-    #   if isinstance(zmeas,(int,float)):
-    #      error+= [['Error: JDUTC is a vector, zmeas must also be a vector corresponding to those dates. See documentation for zmeas']]
+    else:
+       if np.size(zmeas)>1 and np.size(zmeas)!=np.size(JDUTC):
+          error+= [['Error: Size mismatch. JDUTC is a vector, zmeas must also be a vector of same length corresponding to those dates']]
+          raise IndexError('Error: Size mismatch. JDUTC is a vector, zmeas must be a vector of same length corresponding to those dates')
 
     
     # Notify user if both Hipparcos ID and positional data is given.
@@ -133,9 +131,9 @@ def get_BC_vel(JDUTC,
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
 
-    for jdutc in JDUTC:
+    for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
         a = BCPy(JDUTC=jdutc,
-                 ra=ra, dec=dec, pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch,
+                 ra=ra, dec=dec, pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zm, epoch=epoch,
                  loc=loc,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         vel.append(a[0])
