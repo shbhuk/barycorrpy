@@ -15,7 +15,6 @@ import datetime
 
 from astropy.utils.iers import conf,IERS_A, IERS_A_URL, IERS_B, IERS_B_URL, IERS
 from astropy.utils.data import download_file
-from . import utc_tdb
 
 conf.auto_max_age=15
 
