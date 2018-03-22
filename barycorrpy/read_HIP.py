@@ -1,5 +1,4 @@
 import numpy as np
-import inspect
 import os
 
 def find_hip(hip_index,cat_dir=os.path.join(*[os.path.dirname(__file__),'data','hip2.dat'])):
