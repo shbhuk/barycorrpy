@@ -1,16 +1,18 @@
 from __future__ import division
 from __future__ import print_function
 import urllib
-import astropy
 import os
 import datetime
-from astropy.time import Time
 import numpy as np
 import sys
-from astropy.coordinates import EarthLocation
-from astropy.coordinates import get_body_barycentric_posvel
 import math
 import scipy.constants as const
+import astropy
+from astropy.coordinates import EarthLocation
+from astropy.coordinates import get_body_barycentric_posvel
+from astropy.time import Time
+
+
 from .read_HIP import find_hip
 from . import PINT_erfautils as PINT
 

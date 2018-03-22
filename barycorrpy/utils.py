@@ -1,6 +1,6 @@
 import numpy as np
 from astroquery.simbad import Simbad
-import astropy.constants as u
+import astropy.units as u
 from astropy.coordinates import SkyCoord
 
 
@@ -26,17 +26,20 @@ def get_stellar_data(name='',use_hip_if_exists = True):
     
     '''
     customSimbad = Simbad()
-    customSimbad.add_votable_fields('pm', 'plx','parallax','rv_value')
+    customSimbad.add_votable_fields('ra(2;A;ICRS;J2000)', 'dec(2;D;ICRS;J2000)','pm', 'plx','parallax','rv_value')
     #Simbad.list_votable_fields()
-    #customSimbad.remove_votable_fields( 'coordinates')
+    customSimbad.remove_votable_fields( 'coordinates')
     #Simbad.get_field_description('orv')
     obj = customSimbad.query_object(name)
     
-    pos = SkyCoord(ra=obj['RA'],dec=obj['DEC'],unit=(u.hourangle, u.deg))
+    pos = SkyCoord(ra=obj['RA_2_A_ICRS_J2000'],dec=obj['DEC_2_D_ICRS_J2000'],unit=(u.hourangle, u.deg))
     ra = pos.ra.value
     dec = pos.dec.value
     pmra = obj['PMRA'][0]
     pmdec = obj['PMDEC'][0]
     plx = obj['PLX_VALUE'][0]
     rv = obj['RV_VALUE'][0]
+    epoch = 2451545.0
+    
+    return ra,dec,pmra,pmdec,plx,rv,epoch
   

@@ -5,8 +5,8 @@ from astropy.coordinates import EarthLocation
 from astropy.coordinates import get_body_barycentric_posvel, get_body_barycentric
 from astropy.time import Time
 import math
-import scipy.constants as const
-import astropy.constants as u
+import scipy.constants as sc
+import astropy.constants as ac
 import numpy as np
 import os
 
@@ -20,8 +20,8 @@ from .utils import flux_weighting
 #de430 is 100 MB in size
 
 # Parsing constants #
-AU = const.astronomical_unit # [m]
-c = const.c # Speed of light [m/s]
+AU = sc.astronomical_unit # [m]
+c = sc.c # Speed of light [m/s]
 pctoau = 3600*180/np.pi # No. of AU in one parsec
 year = 365.25*3600*24 # [s]
 kmstoauyr = year/(1000*AU)
@@ -30,16 +30,13 @@ M_moon = 73476730924573500000000 # Mass of the Moon [kg]
 
 # Mass and normalised mass of solar system bodies
 ss_bodies = ['Sun', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Moon']
-M = dict(zip(ss_bodies, [u.M_sun.value, 0.3301e24, 4.867e24, u.M_earth.value, 0.6417e24, u.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon])) # [kg]
+M = dict(zip(ss_bodies, [ac.M_sun.value, 0.3301e24, 4.867e24, ac.M_earth.value, 0.6417e24, ac.M_jup.value, 568.5e24, 86.82e24, 102.4e24, M_moon])) # [kg]
 
 #Reduced number of bodies, to increase speed. Does not affect precision at 1 cm/s level
 ss_bodies = ['Sun','Earth','Jupiter','Saturn']
-M = dict(zip(ss_bodies, [u.M_sun.value, u.M_earth.value,u.M_jup.value,568.5e24])) # [kg]
+M = dict(zip(ss_bodies, [ac.uM_sun.value, ac.uM_earth.value,ac.uM_jup.value,568.5e24])) # [kg]
 
-GM = {k:const.G*M[k] for k in ss_bodies}
-
-
-
+GM = {k:sc.G*M[k] for k in ss_bodies}
 
 def get_BC_vel(JDUTC,
        hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
