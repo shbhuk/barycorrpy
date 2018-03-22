@@ -14,7 +14,7 @@ import os
 from .read_HIP import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
-from . import utils
+from .utils import flux_weighting
 
 ### Need to install jplephem ###
 #de430 is 100 MB in size
@@ -363,16 +363,6 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
 
     return weighted_vel, JDUTCMID, warning, status
 
-def flux_weighting(flux,qty):
-    '''
-    INPUT:
-        flux - Numpy Array. Will weight qty array by flux
-        qty - Quantity to be normalized / weighted.
-    
-    OUTPUT:
-        Normalized value
-    '''
-    
-    return sum(qty * flux)/sum(flux)
+
 
 

@@ -25,9 +25,18 @@ def get_stellar_data(name='',use_hip_if_exists = True):
     
     
     '''
-    
-    obj = Simbad.query_object(name)
+    customSimbad = Simbad()
+    customSimbad.add_votable_fields('pm', 'plx','parallax','rv_value')
+    #Simbad.list_votable_fields()
+    #customSimbad.remove_votable_fields( 'coordinates')
+    #Simbad.get_field_description('orv')
+    obj = customSimbad.query_object(name)
     
     pos = SkyCoord(ra=obj['RA'],dec=obj['DEC'],unit=(u.hourangle, u.deg))
-    
-    
+    ra = pos.ra.value
+    dec = pos.dec.value
+    pmra = obj['PMRA'][0]
+    pmdec = obj['PMDEC'][0]
+    plx = obj['PLX_VALUE'][0]
+    rv = obj['RV_VALUE'][0]
+  
