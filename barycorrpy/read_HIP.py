@@ -40,4 +40,6 @@ def find_hip(hip_index,cat_dir=os.path.join(*[os.path.dirname(__file__),'data','
         
     index=np.where(np.array(hip_id)==hip_index)[0][0]
     
-    return hip_id[index],ra[index],dec[index],px_mas[index],pmra[index],pmdec[index],epoch
+    star = {'ra':ra[index],'dec':dec[index],'pmra':pmra[index],'pmdec':pmdec[index],'px':px_mas[index],'epoch':epoch}
+    
+    return star

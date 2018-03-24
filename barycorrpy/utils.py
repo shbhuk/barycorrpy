@@ -32,37 +32,31 @@ def get_stellar_data(name=''):
     customSimbad.remove_votable_fields( 'coordinates')
     #Simbad.get_field_description('orv')
     obj = customSimbad.query_object(name)
+    if obj is None:
+        raise ValueError('ERROR: {} target not found. Check target name or enter RA,Dec,PMRA,PMDec,Plx,RV,Epoch manually\n\n'.format(name))
+    else:        
+        warning += ['{} queried from SIMBAD.'.format(name)]
 
-    # Check for masked values in the most convoluted way possible    
+    # Check for masked values
     if all([not x for x in [obj.mask[0][i] for i in obj.colnames]])==False:
-        warning = 'Masked values present in queried dataset'
-        print(warning)
+        warning += ['Masked values present in queried dataset']
 
-    
-    obj = obj.filled(0)
-    
+
+    obj = obj.filled(None)
     
     pos = SkyCoord(ra=obj['RA_2_A_ICRS_J2000'],dec=obj['DEC_2_D_ICRS_J2000'],unit=(u.hourangle, u.deg))
-    ra = pos.ra.value
-    dec = pos.dec.value
+    ra = pos.ra.value[0]
+    dec = pos.dec.value[0]
     pmra = obj['PMRA'][0]
     pmdec = obj['PMDEC'][0]
     plx = obj['PLX_VALUE'][0]
     rv = obj['RV_VALUE'][0]
     epoch = 2451545.0
     
-    star = {}
-    star['ra'] = ra
-    star['dec'] = dec
-    star['pmra'] = pmra
-    star['pmdec'] = pmdec
-    star['plx'] = plx
-    star['rv'] = rv
-    star['epoch'] = epoch
+    star = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':plx,'rv':rv,'epoch':epoch}
+
+    warning += ['Values queried from SIMBAD are RA:{} Dec:{} PMRA:{} PMDEC:{} Plx:{} RV:{} Epoch:{} '.format(ra,dec,pmra,pmdec,plx,rv,epoch)]
+  
     
-    warning = 'Querying object {} from Simbad. Values used are RA:{} Dec:{} PMRA:{} PMDEC:{} Plx:{} RV:{} Epoch:{} '.format(name,ra,dec,pmra,pmdec,plx,rv,epoch)
-    print(warning)
-    
-    
-    return ra,dec,pmra,pmdec,plx,rv,epoch
+    return star,warning
   

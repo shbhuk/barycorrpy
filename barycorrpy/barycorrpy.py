@@ -14,7 +14,7 @@ import os
 from .read_HIP import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
-from .utils import flux_weighting
+from .utils import flux_weighting,get_stellar_data
 
 ### Need to install jplephem ###
 #de430 is 100 MB in size
@@ -34,13 +34,13 @@ M = dict(zip(ss_bodies, [ac.M_sun.value, 0.3301e24, 4.867e24, ac.M_earth.value, 
 
 #Reduced number of bodies, to increase speed. Does not affect precision at 1 cm/s level
 ss_bodies = ['Sun','Earth','Jupiter','Saturn']
-M = dict(zip(ss_bodies, [ac.uM_sun.value, ac.uM_earth.value,ac.uM_jup.value,568.5e24])) # [kg]
+M = dict(zip(ss_bodies, [ac.M_sun.value, ac.M_earth.value,ac.M_jup.value,568.5e24])) # [kg]
 
 GM = {k:sc.G*M[k] for k in ss_bodies}
 
 def get_BC_vel(JDUTC,
-       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
-       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
+       starname = '', hip_id=None, ra=None, dec=None, epoch=2451545., pmra=None, pmdec=None, px=None, rv=None,
+       obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
@@ -49,14 +49,19 @@ def get_BC_vel(JDUTC,
     INPUT:
         JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times. 
                 In UTC Scale. If using float, be careful about format and scale used.
+        starname : Name of target. Will query SIMBAD database. 
+                                OR / AND
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
-                                OR
+                                OR / AND
         ra, dec : RA and Dec of star [degrees].
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.
         pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
         pmdec : Proper motion in Dec [mas/year]. Default is 0.
         px : Parallax of target [mas]. Default is 0.
+        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV (systemic) of the target at the ~100 km/s precision.
+             Can be ignored for most targets but for high velocity stars. This does not include the barycentric velocity and is 
+             only required to correct for proper motion and secular acceleration.
         
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
                   If obsname is not used, then can enter lat,long,alt.
@@ -65,9 +70,7 @@ def get_BC_vel(JDUTC,
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
         alt : Altitude of observatory [m].
         
-        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV (systemic) of the target at the ~100 km/s precision.
-             Can be ignored for most targets but for high velocity stars. This does not include the barycentric velocity and is 
-             only required to correct for proper motion and secular acceleration.
+
         zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
                 The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric 
                 velocity of the observatory.
@@ -117,14 +120,25 @@ def get_BC_vel(JDUTC,
           error+= [['Error: Size mismatch. JDUTC is a vector, zmeas must also be a vector of same length corresponding to those dates']]
           raise IndexError('Error: Size mismatch. JDUTC is a vector, zmeas must be a vector of same length corresponding to those dates')
 
+    star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
+    star_simbad = {}
+    star_hip = {}
+    star_output = {}
     
-    # Notify user if both Hipparcos ID and positional data is given.
+    if starname:
+        star_simbad,warning1 = get_stellar_data(starname)
+        warning += warning1
     if hip_id:
-        if any([ra, dec, px, pmra, pmdec, epoch-2451545.]):
-            warning += [['Warning: Taking stellar positional data from Hipparcos Catalogue']]
-        
-        _, ra, dec, px, pmra, pmdec, epoch = find_hip(hip_id)
-        
+        if starname:
+            warning += [['Warning: Querying SIMBAD and Hipparcos Catalogue']]   
+        star_hip = find_hip(hip_id)
+    
+    star_output = star_simbad.copy()
+    star_output.update({k:star_hip[k] for k in star_hip if star_hip[k] is not None})
+    star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
+    
+    warning+=['Following are the stellar positional parameters being used - ',star_output]
+           
     if obsname:
         loc = EarthLocation.of_site(obsname)
         lat = loc.lat.value
@@ -136,8 +150,8 @@ def get_BC_vel(JDUTC,
         
 
     for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
-        a = BCPy(JDUTC=jdutc,
-                 ra=ra, dec=dec, pmra=pmra, pmdec=pmdec, px=px, rv=rv, zmeas=zm, epoch=epoch,
+        a = BCPy(**star_output, JDUTC=jdutc,
+                 zmeas=zm, 
                  loc=loc,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         vel.append(a[0])
@@ -264,8 +278,8 @@ def BCPy(JDUTC,
 
  
 def exposure_meter_BC_vel(JDUTC,expmeterflux,
-       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
-       obsname='', lat=0., longi=0., alt=0., rv=0., zmeas=0.,
+       starname = '', hip_id=None, ra=None, dec=None, epoch=2451545., pmra=None, pmdec=None, px=None, rv=None,
+       obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
        
     '''
@@ -277,14 +291,19 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
                 Can also accept list of float JDUTC times. Be cautious about scale used. 
         expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
                        The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2014)
+        starname : Name of target. Will query SIMBAD database. 
+                                OR / AND
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
-                                OR
+                                OR / AND
         ra, dec : RA and Dec of star [degrees].
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.
         pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
         pmdec : Proper motion in Dec [mas/year]. Default is 0.
         px : Parallax of target [mas]. Default is 0.
+        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV (systemic) of the target at the ~100 km/s precision.
+             Can be ignored for most targets but for high velocity stars. This does not include the barycentric velocity and is 
+             only required to correct for proper motion and secular acceleration.
         
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
                   If obsname is not used, then can enter lat,long,alt.
@@ -293,9 +312,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
         alt : Altitude of observatory [m].
         
-        rv : Radial Velocity of Target [m/s]. Default is 0. This is the bulk RV (systemic) of the target at the ~100 km/s precision.
-             Can be ignored for most targets but for high velocity stars. This does not include the barycentric velocity and is 
-             only required to correct for proper motion and secular acceleration.
+
         zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
                 The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric 
                 velocity of the observatory.
@@ -339,7 +356,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
     
     ## Calculate barycentric velocity at each instance of exposure meter reading ##        
     vel,warning,status = get_BC_vel(JDUTC=JDUTC,
-                                hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
                                 obsname=obsname,lat=lat,longi=longi,alt=alt,
                                 rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)   
 
