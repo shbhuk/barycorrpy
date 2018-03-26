@@ -54,9 +54,12 @@ def get_stellar_data(name=''):
     epoch = 2451545.0
     
     star = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':plx,'rv':rv,'epoch':epoch}
-
-    warning += ['Values queried from SIMBAD are RA:{} Dec:{} PMRA:{} PMDEC:{} Plx:{} RV:{} Epoch:{} '.format(ra,dec,pmra,pmdec,plx,rv,epoch)]
+    
+    # Fill Masked values with None. Again. 
+    for i in [k for k in star if star[k]==1e20]:
+        star[i]=None
+        
+    warning += ['Values queried from SIMBAD are {}'.format(star)]
   
     
     return star,warning
-  

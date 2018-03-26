@@ -39,7 +39,7 @@ M = dict(zip(ss_bodies, [ac.M_sun.value, ac.M_earth.value,ac.M_jup.value,568.5e2
 GM = {k:sc.G*M[k] for k in ss_bodies}
 
 def get_BC_vel(JDUTC,
-       starname = '', hip_id=None, ra=None, dec=None, epoch=2451545., pmra=None, pmdec=None, px=None, rv=None,
+       starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     '''
@@ -123,20 +123,23 @@ def get_BC_vel(JDUTC,
     star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
     star_simbad = {}
     star_hip = {}
+    star_zero = {'ra':0.,'dec':0.,'pmra':0.,'pmdec':0.,'px':0.,'rv':0.,'epoch':2451545.0}
     star_output = {}
+
     
     if starname:
         star_simbad,warning1 = get_stellar_data(starname)
         warning += warning1
     if hip_id:
         if starname:
-            warning += [['Warning: Querying SIMBAD and Hipparcos Catalogue']]   
+            warning += ['Warning: Querying SIMBAD and Hipparcos Catalogue']  
         star_hip = find_hip(hip_id)
     
+
     star_output = star_simbad.copy()
     star_output.update({k:star_hip[k] for k in star_hip if star_hip[k] is not None})
     star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
-    
+    star_output.update({k:star_zero[k] for k in star_output if star_output[k] is None})
     warning+=['Following are the stellar positional parameters being used - ',star_output]
            
     if obsname:
@@ -144,7 +147,7 @@ def get_BC_vel(JDUTC,
         lat = loc.lat.value
         longi = loc.lon.value
         alt = loc.height.value
-        warning += [['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f  Longitude = %f  Altitude = %f'%(lat,longi,alt)]]
+        warning += ['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f  Longitude = %f  Altitude = %f'%(lat,longi,alt)]
     else: 
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
@@ -278,7 +281,7 @@ def BCPy(JDUTC,
 
  
 def exposure_meter_BC_vel(JDUTC,expmeterflux,
-       starname = '', hip_id=None, ra=None, dec=None, epoch=2451545., pmra=None, pmdec=None, px=None, rv=None,
+       starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
        

@@ -15,6 +15,7 @@ from astropy.time import Time
 
 from .read_HIP import find_hip
 from . import PINT_erfautils as PINT
+from .utils import get_stellar_data
 
 # Parsing constants #
 AU = const.astronomical_unit # [m]
@@ -230,8 +231,8 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(_
     
     
 def JDUTC_to_BJDTDB(JDUTC,
-       hip_id=0, ra=0., dec=0., epoch=2451545., pmra=0., pmdec=0., px=0.,
-       obsname='', lat=0., longi=0., alt=0., rv=0., 
+       starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
+       obsname='', lat=0., longi=0., alt=0.,  
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     
     '''
@@ -243,9 +244,11 @@ def JDUTC_to_BJDTDB(JDUTC,
     INPUT:
         JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times. 
                 In UTC Scale. If using float, be careful about format and scale used.
+        starname : Name of target. Will query SIMBAD database. 
+                                OR / AND
         hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
-                                OR
+                                OR / AND
         ra, dec : RA and Dec of star [degrees].
         epoch : Epoch of coordinates in Julian Date. Default is J2000 or 2451545.
         pmra : Proper motion in RA [mas/year]. Eg. PMRA = d(RA)/dt * cos(dec). Default is 0.
@@ -298,12 +301,28 @@ def JDUTC_to_BJDTDB(JDUTC,
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
     
-    # Notify user if both Hipparcos ID and positional data is given.
+    star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
+    star_simbad = {'ra':None,'dec':None,'pmra':None,'pmdec':None,'px':None,'rv':None,'epoch':None}
+    star_hip = {}
+    star_zero = {'ra':0.,'dec':0.,'pmra':0.,'pmdec':0.,'px':0.,'rv':0.,'epoch':2451545.0}
+    star_output = {}
+
+    
+    if starname:
+        star_simbad,warning1 = get_stellar_data(starname)
+        warning += warning1
     if hip_id:
-        if any([ra, dec, px, pmra, pmdec, epoch-2451545.]):
-            warning += [['Warning: Taking stellar positional data from Hipparcos Catalogue']]
-        
-        _, ra, dec, px, pmra, pmdec, epoch = find_hip(hip_id)
+        if starname:
+            warning += ['Warning: Querying SIMBAD and Hipparcos Catalogue']  
+        star_hip = find_hip(hip_id)
+    
+
+    star_output = star_simbad.copy()
+    star_output.update({k:star_hip[k] for k in star_hip if star_hip[k] is not None})
+    star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
+    star_output.update({k:star_zero[k] for k in star_zero if star_output[k] is None})
+    warning+=['Following are the stellar positional parameters being used - ',star_output]
+    
         
     if obsname:
         loc = EarthLocation.of_site(obsname)
@@ -315,8 +334,7 @@ def JDUTC_to_BJDTDB(JDUTC,
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
     for jdutc in JDUTC:
-        a = _JDUTC_to_BJDTDB(JDUTC=jdutc,
-                 ra=ra, dec=dec, pmra=pmra, pmdec=pmdec, px=px, rv=rv, epoch=epoch,
+        a = _JDUTC_to_BJDTDB(**star_output,JDUTC=jdutc,
                  loc=loc,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         corr_time.append(a[0])

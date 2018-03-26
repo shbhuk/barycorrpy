@@ -52,5 +52,10 @@ def run_sample():
 
             # JDUTC to BJDTDB time converter
             corr_time = utc_tdb.JDUTC_to_BJDTDB(JDUTC,hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9)
+            
+            
+            # Use SIMBAD query, but replace queried parallax with measured parallax of 0.1 mas
+            result5 = get_BC_vel(JDUTC=2458000.5,starname = 'Proxima B',obsname='CTIO',ephemeris='de430',px=0.1)            
+            
 
-            return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time
+            return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time,result5
