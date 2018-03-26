@@ -55,7 +55,9 @@ def run_sample():
             
             
             # Use SIMBAD query, but replace queried parallax with measured parallax of 0.1 mas
-            result5 = get_BC_vel(JDUTC=2458000.5,starname = 'Proxima B',obsname='CTIO',ephemeris='de430',px=0.1)            
+            result5 = get_BC_vel(JDUTC=2458000.5,starname = 'Proxima B',obsname='CTIO',ephemeris='de430',px=0.1) 
             
-
-            return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time,result5
+            # Can access only the result of the calculation and ignore the warning and error messages if one wishes to. 
+            result6,warning6,status6 =  get_BC_vel(JDUTC=2458000.5,starname = 'Proxima B',obsname='CTIO',ephemeris='de430',px=0.1) 
+                  
+            return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time,result5,result6,warning6,status6
