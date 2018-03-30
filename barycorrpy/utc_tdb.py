@@ -334,9 +334,9 @@ def JDUTC_to_BJDTDB(JDUTC,
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
     for jdutc in JDUTC:
-        a = _JDUTC_to_BJDTDB(**star_output,JDUTC=jdutc,
+        a = _JDUTC_to_BJDTDB(JDUTC=jdutc,
                  loc=loc,
-                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
+                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,**star_output)
         corr_time.append(a[0])
         warning.append(a[1])
         error.append(a[2])
