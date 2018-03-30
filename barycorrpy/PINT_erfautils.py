@@ -2,21 +2,18 @@
 # https://github.com/nanograv/PINT/blob/ea1c3b9f71c06a73d6613d647770b99924f7c9bf/LICENSE.md
 from __future__ import division
 import numpy as np
-import astropy.units as un
+import astropy.units as u
+import datetime
 try:
     import astropy.erfa as erfa
 except ImportError:
     import astropy._erfa as erfa
 import astropy.table as table
-from astropy.coordinates import EarthLocation
 from astropy.time import Time
-SECS_PER_DAY = erfa.DAYSEC
-import datetime
-
 from astropy.utils.iers import conf,IERS_A, IERS_A_URL, IERS_B, IERS_B_URL, IERS
 from astropy.utils.data import download_file
-from . import utc_tdb
 
+SECS_PER_DAY = erfa.DAYSEC
 conf.auto_max_age=15
 
 iers_b_file = download_file(IERS_B_URL, cache=True)
@@ -108,7 +105,7 @@ def gcrs_posvel_from_itrf(loc, toas,tts):
     rpm = erfa.pom00(xp, yp, sp)
 
     # Observatory geocentric coords in m
-    xyzm = np.array([a.to(un.m).value for a in loc.geocentric])
+    xyzm = np.array([a.to(u.m).value for a in loc.geocentric])
     x, y, z = np.dot(xyzm, rpm).T
 
     # Functions of Earth Rotation Angle

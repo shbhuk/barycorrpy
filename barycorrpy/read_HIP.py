@@ -1,8 +1,7 @@
 import numpy as np
-import inspect
 import os
 
-def find_hip(hip_index,cat_dir=os.path.join(os.path.dirname(__file__),'hip2.dat')):
+def find_hip(hip_index,cat_dir=os.path.join(*[os.path.dirname(__file__),'data','hip2.dat'])):
     '''
     NOTE: Hipparcos Catalogue Epoch is J1991.25 or JD 2448349.0625
     
@@ -20,9 +19,6 @@ def find_hip(hip_index,cat_dir=os.path.join(os.path.dirname(__file__),'hip2.dat'
     
     '''
     epoch = 2448349.0625
-
-    
-    #HIP=np.loadtxt(f)
     
     hip_id=[]
     ra=[]
@@ -30,9 +26,7 @@ def find_hip(hip_index,cat_dir=os.path.join(os.path.dirname(__file__),'hip2.dat'
     px_mas=[]
     pmra=[]
     pmdec=[]
-    
 
-    
     
     with open(cat_dir) as f:
         for line in f:
@@ -46,4 +40,6 @@ def find_hip(hip_index,cat_dir=os.path.join(os.path.dirname(__file__),'hip2.dat'
         
     index=np.where(np.array(hip_id)==hip_index)[0][0]
     
-    return hip_id[index],ra[index],dec[index],px_mas[index],pmra[index],pmdec[index],epoch
+    star = {'ra':ra[index],'dec':dec[index],'pmra':pmra[index],'pmdec':pmdec[index],'px':px_mas[index],'epoch':epoch}
+    
+    return star

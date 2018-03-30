@@ -7,13 +7,13 @@ def readme():
 
 
 setup(name='barycorrpy',
-      version='0.1',
+      version='0.2',
       description='Barycentric Velocity correction at 1 cm/s level',
       long_description=readme(),
       url='https://github.com/shbhuk/barycorrpy',
       author='Shubham Kanodia',
       author_email='shbhuk@gmail.com',
-      install_requires=['astropy>2','jplephem','numpy','scipy'],
+      install_requires=['astropy>2','jplephem','numpy','scipy','astroquery'],
       packages=['barycorrpy'],
       license='GPLv3',
       classifiers=['Topic :: Scientific/Engineering :: Astronomy'],
