@@ -92,7 +92,7 @@ def run_sample():
                 
             
             if b==7:
-                print('***********SUCCESS**************\nAll barycentric correction velocities match expected values to 1 cm/s')
+                print('***********SUCCESS**************\nAll barycentric correction velocities match expected values to 1 cm/s\n**************THE ANSWER IS ALWAYS 42****************')
             else:
                 print('{} out of 7 results match, and are shown below. Check others - \n'.format(b,a))
                   
