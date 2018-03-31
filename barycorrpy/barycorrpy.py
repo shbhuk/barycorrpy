@@ -132,7 +132,7 @@ def get_BC_vel(JDUTC,
        # set/overwrite with user input
        star_par['rv'] = rv
     # remove None, so that default of BCPy can apply.
-    star_par = {k:v for (k,v) in star_par if v is not None}
+    star_par = {k:v for (k,v) in star_par.items() if v is not None}
     warning += ['Following are the stellar positional parameters being used - ', star_par]
     
     # Observatory parameters
@@ -148,9 +148,9 @@ def get_BC_vel(JDUTC,
 
     for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
         a = BCPy(JDUTC=jdutc,
-                 **star_par, zmeas=zm, 
+                 zmeas=zm, 
                  loc=loc,
-                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
+                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, **star_par)
         vel.append(a[0])
         warning.append(a[1])
         error.append(a[2])
