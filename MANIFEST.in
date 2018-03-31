@@ -1,3 +1,4 @@
-include barycorrpy/leap_sec.txt
-inlcude barycorrpy/leapsec_log.txt
-include barycorrpy/hip2.dat
+include barycorrpy/data/leap_sec.txt
+inlcude barycorrpy/data/leapsec_log.txt
+include barycorrpy/data/hip2.dat
+include barycorrpy/data/tempo_ephem_checkv5.txt
