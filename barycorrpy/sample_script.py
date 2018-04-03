@@ -94,6 +94,6 @@ def run_sample():
             if b==7:
                 print('***********SUCCESS**************\nAll barycentric correction velocities match expected values to 1 cm/s\n')
             else:
-                print('{} out of 7 results match, and are shown below. Check others - \n'.format(b,a))
+                print('{} out of 7 results match. Compare outputs vs those on the github wiki. Check others - \n'.format(b,a))
                   
             return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time,result5,result6,warning6,status6

@@ -11,7 +11,7 @@ import numpy as np
 import os
 
 
-from .read_HIP import find_hip
+from . import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
 from .utils import flux_weighting,get_stellar_data

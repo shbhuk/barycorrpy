@@ -12,10 +12,8 @@ from astropy.coordinates import EarthLocation
 from astropy.coordinates import get_body_barycentric_posvel
 from astropy.time import Time
 
-
-from .read_HIP import find_hip
 from . import PINT_erfautils as PINT
-from .utils import get_stellar_data
+from .utils import get_stellar_data,find_hip
 
 # Parsing constants #
 AU = const.astronomical_unit # [m]
