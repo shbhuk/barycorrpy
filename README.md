@@ -45,3 +45,6 @@ We advocate not using the standard Astropy converter this due to the same leap s
 ### INSTALLATION INSTRUCTIONS
 
 The instructions for installation and getting started for this package are detailed in the [wiki](https://github.com/shbhuk/barycorrpy/wiki).
+
+To sign up for updates, please join the Google Group linked here - 
+https://groups.google.com/forum/#!forum/barycorrpy
