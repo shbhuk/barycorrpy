@@ -1,5 +1,9 @@
+from __future__ import print_function
 import numpy as np
-from astroquery.simbad import Simbad
+try:
+    from astroquery.simbad import Simbad
+except:
+    print('Cannot import astroquery.simbad')
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 import os
