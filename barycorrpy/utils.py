@@ -55,7 +55,7 @@ def get_stellar_data(name=''):
     pmra = obj['PMRA'][0]
     pmdec = obj['PMDEC'][0]
     plx = obj['PLX_VALUE'][0]
-    rv = obj['RV_VALUE'][0]
+    rv = obj['RV_VALUE'][0] * 1000 #SIMBAD output is in km/s. Converting to m/s
     epoch = 2451545.0
     
     star = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':plx,'rv':rv,'epoch':epoch}

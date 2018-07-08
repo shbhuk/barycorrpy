@@ -39,7 +39,7 @@ M = dict(zip(ss_bodies, [ac.M_sun.value, ac.M_earth.value,ac.M_jup.value,568.5e2
 GM = {k:sc.G*M[k] for k in ss_bodies}
 
 def get_BC_vel(JDUTC,
-       starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
+       starname= '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     '''
@@ -51,7 +51,7 @@ def get_BC_vel(JDUTC,
                 In UTC Scale. If using float, be careful about format and scale used.
         starname : Name of target. Will query SIMBAD database. 
                                 OR / AND
-        hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
+        hip_id : Hipparcos Catalog ID. (Integer). Epoch will be taken to be Catalogue Epoch or J1991.25
                 If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
                                 OR / AND
         ra, dec : RA and Dec of star [degrees].
@@ -111,7 +111,7 @@ def get_BC_vel(JDUTC,
     # Check for JDUTC type   
     if type(JDUTC)!=Time:
          warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
-         JDUTC=Time(JDUTC, format='jd', scale='utc')
+         JDUTC = Time(JDUTC, format='jd', scale='utc')
        
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
@@ -221,7 +221,7 @@ def BCPy(JDUTC,
     epoch0 = 2000. + (epoch-2451545.)/365.25
     yearnow = 2000. + (JDTDB.jd-2451545.)/365.25
     
-    T = yearnow - epoch0                           # [years]
+    T = yearnow - epoch0                           # [yr]
     vpi = rv/1.e3 * kmstoauyr * (px/1.e3/pctoau)   # [rad/yr]
     vel = mu + vpi*r0hat                           # [rad/yr] (m in AA)
     r = r0hat + vel*T                              # [rad]    (p1 in AA)
@@ -263,7 +263,7 @@ def BCPy(JDUTC,
         a = np.dot((rhohat-np.dot(Xhat,rhohat)*Xhat), beta_earth)
         zshapiro += -2.*GM[ss_body]*a / ((c*c)*Xmag*(1+np.dot(Xhat, rhohat)))   # Eq 27
         
-        if Xmag!=0.:
+        if Xmag:
             Sum_GR += GM[ss_body] / Xmag  # [(m/s)^2]
         
     zgravity = 1./(1+Sum_GR/(c*c)) - 1
@@ -280,7 +280,7 @@ def BCPy(JDUTC,
     return v_final, warning, error
 
  
-def exposure_meter_BC_vel(JDUTC,expmeterflux,
+def exposure_meter_BC_vel(JDUTC, expmeterflux,
        starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
@@ -290,7 +290,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
     Enter JDUTC and expmeterflux from exposure meter readings to calculate barycentric velocity correction for exposure. 
     
     INPUT: 
-        JDUTC : Can enter multiple times in Astropy Time object.In UTC Scale. 
+        JDUTC : Can enter multiple times in Astropy Time object. In UTC Scale. 
                 Can also accept list of float JDUTC times. Be cautious about scale used. 
         expmeterflux : Array or List of exposure meter fluxes corresponding to each JDUTC. 
                        The resultant barycentric correction will be calculated at each JDUTC and then weighted by the exposure meter fluxes. (See Landoni 2014)
@@ -346,15 +346,13 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
     expmeterflux = np.array(expmeterflux)
     error = []
 
-    
-
     if isinstance(JDUTC,(int,float)):
         JDUTC = np.array([JDUTC])
         
     ## Check for size of Flux Array ##    
     if len(JDUTC)!=len(expmeterflux):
         print('Error: Size of JDUTC array is not equal to expmeterflux (Flux) array')
-        error+=['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
+        error += ['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
 
     
     ## Calculate barycentric velocity at each instance of exposure meter reading ##        
@@ -371,7 +369,7 @@ def exposure_meter_BC_vel(JDUTC,expmeterflux,
     except:
         JDUTC = np.array(JDUTC)
         
-    JDUTCMID = flux_weighting(flux = expmeterflux, qty = JDUTC)
+    JDUTCMID = flux_weighting(flux=expmeterflux, qty=JDUTC)
     
     # Error handling
     if error:
