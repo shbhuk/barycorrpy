@@ -24,7 +24,7 @@ AU = sc.astronomical_unit # [m]
 c = sc.c # Speed of light [m/s]
 pctoau = 3600*180/np.pi # No. of AU in one parsec
 year = 365.25*3600*24 # [s]
-kmstoauyr = year/(1000*AU)
+kmstoauyr = 1000 * year/(AU)
 
 M_moon = 73476730924573500000000 # Mass of the Moon [kg]
 

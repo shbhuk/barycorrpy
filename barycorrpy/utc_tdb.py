@@ -224,7 +224,7 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(_
     JDTDB = Time(TDB,scale='tdb',format='datetime')
     JDTDB.format='jd'
 
-    return JDTDB,JDTT,warning,
+    return JDTDB,JDTT,warning,error
     
     
     
