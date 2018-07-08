@@ -228,7 +228,7 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(_
     
     
     
-def JDUTC_to_JDTCB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(__file__),'data')):
+#def JDUTC_to_JDTCB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(__file__),'data')):
     '''
     Convert JDUTC to JDTCB (Barycentric Coordinate Time)
     INPUT:
