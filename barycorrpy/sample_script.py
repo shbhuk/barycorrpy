@@ -77,16 +77,16 @@ def run_sample():
             
             
             # Use SIMBAD query, but replace queried parallax with measured parallax of 0.1 mas
-            result5 = get_BC_vel(JDUTC=2458000.5,starname = 'Proxima B',obsname='CTIO',ephemeris='de430',px=0.1) 
+            result5 = get_BC_vel(JDUTC=2458000.5,starname = 'Proxima',obsname='CTIO',ephemeris='de430',px=0.1) 
             
-            if np.isclose(a = result5[0],b = -80829.7699,atol = 1e-2, rtol = 0):
+            if np.isclose(a = result5[0],b = -80829.774, atol = 1e-2, rtol = 0):
                 a.append('result5')
                 b+=1 
             
             # Can access only the result of the calculation and ignore the warning and error messages if one wishes to. 
-            result6,warning6,status6 =  get_BC_vel(JDUTC=2458000.5,starname = 'Proxima B',obsname='CTIO',ephemeris='de430',px=0.1) 
+            result6,warning6,status6 =  get_BC_vel(JDUTC=2458000.5,starname = 'Proxima',obsname='CTIO',ephemeris='de430',px=0.1) 
             
-            if np.isclose(a = result6,b = -80829.7699,atol = 1e-2, rtol = 0):
+            if np.isclose(a = result6,b = -80829.774,atol = 1e-2, rtol = 0):
                 a.append('result6')
                 b+=1 
                 
@@ -94,6 +94,6 @@ def run_sample():
             if b==7:
                 print('***********SUCCESS**************\nAll barycentric correction velocities match expected values to 1 cm/s\n')
             else:
-                print('{} out of 7 results match, and are shown below. Check others - \n'.format(b,a))
+                print('{} out of 7 results match. Compare outputs vs those on the github wiki. Check others - \n'.format(b,a))
                   
             return result,result2,result3,result4,JDUTCMID,warning4,status4,corr_time,result5,result6,warning6,status6
