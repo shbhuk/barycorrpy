@@ -44,5 +44,10 @@ We advocate not using the standard Astropy converter this due to the same leap s
 
 The instructions for installation and getting started for this package are detailed in the [wiki](https://github.com/shbhuk/barycorrpy/wiki).
 
+## Citation 
+To cite using this code you can cite this paper - [RNAAS](http://iopscience.iop.org/article/10.3847/2515-5172/aaa4b7).
+
+Guidelines to cite this package can be found [here](https://github.com/AASJournals/Tutorials/blob/master/Repositories/CitingRepositories.md).
+
 To sign up for updates, please join the Google Group linked here - 
 https://groups.google.com/forum/#!forum/barycorrpy
