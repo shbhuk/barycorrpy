@@ -5,4 +5,4 @@ from .sample_script import *
 from .barycorrpy import get_BC_vel,BCPy,exposure_meter_BC_vel
 
 
-__version__ = '0.2.1.1'
+__version__ = '0.2.2.1'
