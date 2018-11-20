@@ -292,7 +292,7 @@ def JDUTC_to_BJDTDB(JDUTC,
                       If False, then will just give a warning message. Default is True.
     
     OUTPUT:
-        corr_time : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014.
+        corr_time : BJDTDB time
         warning : Warning and Error message from the routine.
         status : Status regarding warning and error message. Returns the following -
                 0 - No warning or error.
