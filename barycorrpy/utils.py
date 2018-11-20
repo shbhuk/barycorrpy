@@ -61,9 +61,10 @@ def get_stellar_data(name=''):
     star = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':plx,'rv':rv,'epoch':epoch}
     
     # Fill Masked values with None. Again. 
-    for i in [k for k in star if star[k]==1e20]:
-        star[i]=None
-        
+    for i in star:
+        if star[i] > 1e10:
+            star[i] = None           
+       
     warning += ['Values queried from SIMBAD are {}'.format(star)]
   
     
