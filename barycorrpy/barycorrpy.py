@@ -5,7 +5,6 @@ from astropy.coordinates import EarthLocation
 from astropy.coordinates import get_body_barycentric_posvel, get_body_barycentric
 from astropy.time import Time
 import math
-import scipy.constants as sc
 import astropy.constants as ac
 import numpy as np
 import os
@@ -20,8 +19,8 @@ from .utils import flux_weighting,get_stellar_data
 #de430 is 100 MB in size
 
 # Parsing constants #
-AU = sc.astronomical_unit # [m]
-c = sc.c # Speed of light [m/s]
+AU = ac.au.value # [m]
+c = ac.c.value # Speed of light [m/s]
 pctoau = 3600*180/np.pi # No. of AU in one parsec
 year = 365.25*3600*24 # [s]
 kmstoauyr = 1000 * year/(AU)
@@ -36,7 +35,7 @@ M = dict(zip(ss_bodies, [ac.M_sun.value, 0.3301e24, 4.867e24, ac.M_earth.value, 
 ss_bodies = ['Sun','Earth','Jupiter','Saturn']
 M = dict(zip(ss_bodies, [ac.M_sun.value, ac.M_earth.value,ac.M_jup.value,568.5e24])) # [kg]
 
-GM = {k:sc.G*M[k] for k in ss_bodies}
+GM = {k:ac.G.value*M[k] for k in ss_bodies}
 
 def get_BC_vel(JDUTC,
        starname= '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
