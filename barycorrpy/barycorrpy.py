@@ -47,6 +47,8 @@ def get_BC_vel(JDUTC,
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values).
     
+    Note: Can be used for stellar observations, or for observations of the Sun or other Solar System objects.
+    
     INPUT:
         JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times. 
                 In UTC Scale. If using float, be careful about format and scale used.
@@ -71,7 +73,6 @@ def get_BC_vel(JDUTC,
         longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
         alt : Altitude of observatory [m].
         
-
         zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
                 The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric 
                 velocity of the observatory.
@@ -81,22 +82,51 @@ def get_BC_vel(JDUTC,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is 
-        script directory.
+                script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
         SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
                 To correct for Solar RV observations set Target = 'Sun', for reflected light observations ...?
+                For Solar observations:
+                Only inputs required are - 
+                    1. JDUTC
+                    2. loc
+                    3. zmeas
+                    4. ephemeris
+                    5. leap_dir
+                    6. leap_update
+                  
     
     OUTPUT:
-        vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014. 
-        NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
-            The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
-            required. This matters at ~ m/s level and hence must be included.
-        warning : Warning and Error message from the routine.
-        status : Status regarding warning and error message. Returns the following -
-                0 - No warning or error.
-                1 - Warning message.
-                2 - Error message.
+        FOR STELLAR OBSERVATIONS (not the Sun)
+        If SolSystemTarget == None
+            vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014. 
+            NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
+                The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
+                required. This matters at ~ m/s level and hence must be included.
+            warning : Warning and Error message from the routine.                
+            status : Status regarding warning and error message. Returns the following -
+                    0 - No warning or error.
+                    1 - Warning message.
+                    2 - Error message.
+                    
+        FOR SOLAR OBSERVATIONS            
+        If SolSystemTarget == Sun
+            v_true: The true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
+                If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument, 
+                then in this formulation, v_true will show the motion of the Sun, 
+                which is mostly dominated by the synodic period of Jupiter as seen from Earth.
+            v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
+                This output returns the theoretical prediction for the redshift which includes the barycentric component.        
+                The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
+                Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
+
+            warning : Warning and Error message from the routine.
+            status : Status regarding warning and error message. Returns the following -
+                    0 - No warning or error.
+                    1 - Warning message.
+                    2 - Error message.
+            
     
     Example:
     >>> from astropy.time import Time
@@ -106,7 +136,6 @@ def get_BC_vel(JDUTC,
 
     '''
     
-    vel = []
     warning = []
     error = []
     status = 0
@@ -131,8 +160,9 @@ def get_BC_vel(JDUTC,
         warning += ['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f  Longitude = %f  Altitude = %f'%(lat,longi,alt)]
     else: 
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
-        
-    if not SolSystemTarget:
+    
+    ## STELLAR TARGET ##    
+    if SolSystemTarget is None:
         # Running correction for stellar observation
         star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
         star_simbad = {}
@@ -153,7 +183,8 @@ def get_BC_vel(JDUTC,
         star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
         star_output.update({k:star_zero[k] for k in star_output if star_output[k] is None})
         warning+=['Following are the stellar positional parameters being used - ',star_output]
-                    
+        vel = []
+                                        
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = BCPy(JDUTC=jdutc,
                     zmeas=zm, 
@@ -162,21 +193,40 @@ def get_BC_vel(JDUTC,
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
+
+        # Status messages to check for warning or error
+        if not all(vel): error += ['Check inputs. Error in code']
+        if any(error):   status |= 2
+        if any(warning): status |= 1
+        # Convert velocity from list to numpy array
+        vel = np.array(vel)
+        
+        return vel, warning+error, status
+
+    ## SOLAR OBSERVATIONS ##
     elif SolSystemTarget == 'Sun':
+        v_true = []
+        v_predicted = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):        
-            SolarBarycentricCorrection(JDUTC=jdutc, loc=loc,
+            a = SolarBarycentricCorrection(JDUTC=jdutc, loc=loc,
                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
+            v_true.append(a[0])
+            v_predicted.append(a[1])
+            warning.append(a[2])
+            error.append(a[3])
+
+        # Status messages to check for warning or error
+        if not all(vel): error += ['Check inputs. Error in code']
+        if any(error):   status |= 2
+        if any(warning): status |= 1
+        # Convert velocity from list to numpy array
+        vel = np.array(vel)
+        
+        return v_true, v_predicted, warning+error, status
         
     
 
-    # Status messages to check for warning or error
-    if not all(vel): error += ['Check inputs. Error in code']
-    if any(error):   status |= 2
-    if any(warning): status |= 1
-    # Convert velocity from list to numpy array
-    vel = np.array(vel)
-    
-    return vel, warning+error, status
+
 
 
 def BCPy(JDUTC,
@@ -290,7 +340,8 @@ def BCPy(JDUTC,
 def exposure_meter_BC_vel(JDUTC, expmeterflux,
        starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
-       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
+       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True,
+       SolSystemTarget=None):
        
     '''
     Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time. 
@@ -332,22 +383,54 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is 
-        script directory.
+            script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
+        SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
+                To correct for Solar RV observations set Target = 'Sun', for reflected light observations ...?
+                For Solar observations:
+                Only inputs required are - 
+                    1. JDUTC
+                    2. loc
+                    3. zmeas
+                    4. ephemeris
+                    5. leap_dir
+                    6. leap_update
 
        
     OUTPUT:
-        weighted_vel : The barycenter-corrected RV (m/s) for the exposure as weighted by the flux from the exposure meter as defined in Wright & Eastman, 2014. 
-                NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
-                The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
-                required. This matters at ~ m/s level and hence must be included.
-        JDUTCMID : The flux weighted midpoint time is returned. 
-        warning : Warning and Error message from the routine
-        status : Status regarding warning and error message. Returns the following -
-                0 - No warning or error.
-                1 - Warning message.
-                2 - Error message.
+        FOR STELLAR OBSERVATIONS (not the Sun)
+        If SolSystemTarget == None
+            weighted_vel : The barycenter-corrected RV (m/s) for the exposure as weighted by the flux from the exposure meter as defined in Wright & Eastman, 2014. 
+                    NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
+                    The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
+                    required. This matters at ~ m/s level and hence must be included.
+
+            JDUTCMID : The flux weighted midpoint time is returned. 
+            warning : Warning and Error message from the routine
+            status : Status regarding warning and error message. Returns the following -
+                        0 - No warning or error.
+                        1 - Warning message.
+                        2 - Error message.
+
+
+        FOR SOLAR OBSERVATIONS            
+        If SolSystemTarget == Sun
+            weighted_v_true: Flux weighted true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
+                If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument, 
+                then in this formulation, v_true will show the motion of the Sun, 
+                which is mostly dominated by the synodic period of Jupiter as seen from Earth.
+            weighted_v_predicted: Flux weighted ideal redshift measured for the Sun from Earth for given location and time.
+                This output returns the theoretical prediction for the redshift which includes the barycentric component.        
+                The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
+                Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
+
+            JDUTCMID : The flux weighted midpoint time is returned. 
+            warning : Warning and Error message from the routine
+            status : Status regarding warning and error message. Returns the following -
+                        0 - No warning or error.
+                        1 - Warning message.
+                        2 - Error message.
         
     '''
     expmeterflux = np.array(expmeterflux)
@@ -361,30 +444,58 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
         print('Error: Size of JDUTC array is not equal to expmeterflux (Flux) array')
         error += ['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
 
+    ####################
+    ## STELLAR TARGET ##    
+    if SolSystemTarget is None:
+        # Running correction for stellar observation
+        ## Calculate barycentric velocity at each instance of exposure meter reading ##        
+        vel,warning,status = get_BC_vel(JDUTC=JDUTC,
+                                    starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                    obsname=obsname,lat=lat,longi=longi,alt=alt,
+                                    rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update, SolSystemTarget=SolSystemTarget)   
     
-    ## Calculate barycentric velocity at each instance of exposure meter reading ##        
-    vel,warning,status = get_BC_vel(JDUTC=JDUTC,
-                                starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
-                                obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update)   
-
-    ## Weight it by flux ##
-
-    weighted_vel = flux_weighting(flux = expmeterflux, qty = vel)
-    try:
-        JDUTC = JDUTC.jd
-    except:
-        JDUTC = np.array(JDUTC)
+        ## Weight it by flux ##
+    
+        weighted_vel = flux_weighting(flux = expmeterflux, qty = vel)
+        try:
+            JDUTC = JDUTC.jd
+        except:
+            JDUTC = np.array(JDUTC)
+            
+        JDUTCMID = flux_weighting(flux=expmeterflux, qty=JDUTC)
         
-    JDUTCMID = flux_weighting(flux=expmeterflux, qty=JDUTC)
+        # Error handling
+        if error:
+            warning.append(error)
+            status = 2
     
-    # Error handling
-    if error:
-        warning.append(error)
-        status = 2
+        return weighted_vel, JDUTCMID, warning, status
 
-    return weighted_vel, JDUTCMID, warning, status
+    ########################            
+    ## SOLAR OBSERVATIONS ##
+    elif SolSystemTarget == 'Sun':
+        v_true, v_predicted, warning, status = get_BC_vel(JDUTC=JDUTC,
+                                    starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                    obsname=obsname,lat=lat,longi=longi,alt=alt,
+                                    rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update, SolSystemTarget=SolSystemTarget) 
 
+        ## Weight it by flux ##
+    
+        weighted_v_true = flux_weighting(flux = expmeterflux, qty = v_true)
+        weighted_v_predicted = flux_weighting(flux = expmeterflux, qty = v_predicted)
 
+        try:
+            JDUTC = JDUTC.jd
+        except:
+            JDUTC = np.array(JDUTC)
+            
+        JDUTCMID = flux_weighting(flux=expmeterflux, qty=JDUTC)
+        
+        # Error handling
+        if error:
+            warning.append(error)
+            status = 2
+    
+        return weighted_v_true, weighted_v_predicted, JDUTCMID, warning, status
 
 

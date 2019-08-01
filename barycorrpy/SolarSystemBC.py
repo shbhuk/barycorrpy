@@ -23,7 +23,7 @@ year = 365.25*3600*24 # [s]
 kmstoauyr = 1000 * year/(AU)
 
 
-def SolarBarycentricCorrection(JDUTC, loc, zmeas, ephemeris, leap_dir, leap_update):
+def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
     """
     Perform barycentric correction for Solar observations.
     INPUTS:
@@ -38,19 +38,19 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas, ephemeris, leap_dir, leap_upda
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir: Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is 
-        script directory.
+                script directory.
         leap_update: If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
     OUTPUTS:
-        v_true: The true radial velocity of the Sun.
+        v_true: The true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
                 If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument, 
-                then in this formulation, ztrue will show the synodic period of Jupiter
-                as seen from Earth.
+                then in this formulation, v_true will show the motion of the Sun, 
+                which is mostly dominated by the synodic period of Jupiter as seen from Earth.
         v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
                 This output returns the theoretical prediction for the redshift which includes the barycentric component.
         
         The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
-        Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) times c.
+        Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
         
     
     """
@@ -109,4 +109,4 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas, ephemeris, leap_dir, leap_upda
     v_predicted = c * zpredicted # [m/s]
 
     
-    return v_true, v_predicted
+    return v_true, v_predicted, warning, error
