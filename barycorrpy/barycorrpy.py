@@ -13,6 +13,7 @@ import os
 from . import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
+from .SolarSystemBC import SolarBarycentricCorrection
 from .utils import flux_weighting,get_stellar_data
 
 ### Need to install jplephem ###
@@ -40,7 +41,8 @@ GM = {k:ac.G.value*M[k] for k in ss_bodies}
 def get_BC_vel(JDUTC,
        starname= '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
-       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
+       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True,
+       SolSystemTarget=None):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values).
@@ -82,6 +84,8 @@ def get_BC_vel(JDUTC,
         script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
+        SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
+                To correct for Solar RV observations set Target = 'Sun', for reflected light observations ...?
     
     OUTPUT:
         vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014. 
@@ -119,28 +123,6 @@ def get_BC_vel(JDUTC,
           error+= [['Error: Size mismatch. JDUTC is a vector, zmeas must also be a vector of same length corresponding to those dates']]
           raise IndexError('Error: Size mismatch. JDUTC is a vector, zmeas must be a vector of same length corresponding to those dates')
 
-    star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
-    star_simbad = {}
-    star_hip = {}
-    star_zero = {'ra':0.,'dec':0.,'pmra':0.,'pmdec':0.,'px':0.,'rv':0.,'epoch':2451545.0}
-    star_output = {}
-
-    
-    if starname:
-        star_simbad,warning1 = get_stellar_data(starname)
-        warning += warning1
-    if hip_id:
-        if starname:
-            warning += ['Warning: Querying SIMBAD and Hipparcos Catalogue']  
-        star_hip = find_hip(hip_id)
-    
-
-    star_output = star_simbad.copy()
-    star_output.update({k:star_hip[k] for k in star_hip if star_hip[k] is not None})
-    star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
-    star_output.update({k:star_zero[k] for k in star_output if star_output[k] is None})
-    warning+=['Following are the stellar positional parameters being used - ',star_output]
-           
     if obsname:
         loc = EarthLocation.of_site(obsname)
         lat = loc.lat.value
@@ -150,15 +132,41 @@ def get_BC_vel(JDUTC,
     else: 
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
         
-
-    for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
-        a = BCPy(JDUTC=jdutc,
-                 zmeas=zm, 
-                 loc=loc,
-                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,**star_output)
-        vel.append(a[0])
-        warning.append(a[1])
-        error.append(a[2])
+    if not SolSystemTarget:
+        # Running correction for stellar observation
+        star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
+        star_simbad = {}
+        star_hip = {}
+        star_zero = {'ra':0.,'dec':0.,'pmra':0.,'pmdec':0.,'px':0.,'rv':0.,'epoch':2451545.0}
+        star_output = {}
+    
+        if starname:
+            star_simbad,warning1 = get_stellar_data(starname)
+            warning += warning1
+        if hip_id:
+            if starname:
+                warning += ['Warning: Querying SIMBAD and Hipparcos Catalogue']  
+            star_hip = find_hip(hip_id)
+        
+        star_output = star_simbad.copy()
+        star_output.update({k:star_hip[k] for k in star_hip if star_hip[k] is not None})
+        star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
+        star_output.update({k:star_zero[k] for k in star_output if star_output[k] is None})
+        warning+=['Following are the stellar positional parameters being used - ',star_output]
+                    
+        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
+            a = BCPy(JDUTC=jdutc,
+                    zmeas=zm, 
+                    loc=loc,
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,**star_output)
+            vel.append(a[0])
+            warning.append(a[1])
+            error.append(a[2])
+    elif SolSystemTarget == 'Sun':
+        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):        
+            SolarBarycentricCorrection(JDUTC=jdutc, loc=loc,
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
+        
     
 
     # Status messages to check for warning or error
