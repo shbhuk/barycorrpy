@@ -100,7 +100,7 @@ def get_BC_vel(JDUTC,
     OUTPUT:
         FOR STELLAR OBSERVATIONS (not the Sun)
         If SolSystemTarget == None
-            vel : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014. 
+            v_true : The barycenter-corrected RV [m/s] as defined in Wright & Eastman, 2014. 
             NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
                 The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
                 required. This matters at ~ m/s level and hence must be included.
@@ -183,25 +183,25 @@ def get_BC_vel(JDUTC,
         star_output.update({k:star_par[k] for k in star_par if star_par[k] is not None})
         star_output.update({k:star_zero[k] for k in star_output if star_output[k] is None})
         warning+=['Following are the stellar positional parameters being used - ',star_output]
-        vel = []
+        v_true = []
                                         
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = BCPy(JDUTC=jdutc,
                     zmeas=zm, 
                     loc=loc,
                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,**star_output)
-            vel.append(a[0])
+            v_true.append(a[0])
             warning.append(a[1])
             error.append(a[2])
 
         # Status messages to check for warning or error
-        if not all(vel): error += ['Check inputs. Error in code']
+        if not all(v_true): error += ['Check inputs. Error in code']
         if any(error):   status |= 2
         if any(warning): status |= 1
         # Convert velocity from list to numpy array
-        vel = np.array(vel)
+        v_true = np.array(v_true)
         
-        return vel, warning+error, status
+        return v_true, warning+error, status
 
     ## SOLAR OBSERVATIONS ##
     elif SolSystemTarget == 'Sun':
