@@ -28,31 +28,31 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     Perform barycentric correction for Solar observations.
     INPUTS:
         JDUTC: Astropy Time object in UTC scale with JD format
-        loc: Astropy EarthLocation Object) 
+        loc: Astropy EarthLocation Object)
         zmeas : Measured redshift (e.g., the result of cross correlation with template spectrum). Default is 0.
-                The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric 
+                The redshift measured by the spectrograph before any barycentric correction. Therefore zmeas includes the barycentric
                 velocity of the observatory.
         ephemeris: Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
-                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
-                    ['de432s','de430',
-                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
-                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
-        leap_dir: Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is 
+                For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
+                ['de432s','de430',
+                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
+                'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
+        leap_dir: Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
                 script directory.
         leap_update: If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True.
+                If False, then will just give a warning message. Default is True.
     OUTPUTS:
         v_true: The true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
-                If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument, 
-                then in this formulation, v_true will show the motion of the Sun, 
+                If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument,
+                then in this formulation, v_true will show the motion of the Sun,
                 which is mostly dominated by the synodic period of Jupiter as seen from Earth.
         v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
                 This output returns the theoretical prediction for the redshift which includes the barycentric component.
-        
+
         The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
         Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
-        
-    
+
+
     """
 
     # Convert times to obtain TDB and TT
@@ -78,9 +78,7 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     gamma_earth = 1. / np.sqrt(1.-sum(beta_earth**2))
 
-
-
-    ##ignoring retarded time for now##
+    ## Ignoring retarded time for now##
 
     target_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
 
@@ -94,8 +92,6 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     Pos_mag = np.sqrt(sum(Pos_vector**2)) #[m]
     Pos_hat = Pos_vector/Pos_mag
 
-
-
     zGREarth =  ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
                 + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(Pos_vector**2))))
 
@@ -105,8 +101,7 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     zb = ((gamma_earth*(1 + np.dot(beta_earth,Pos_hat))) / (1+zGREarth)) - 1
 
-    v_true = c * ((1.+zb)*(1.+zpredicted)-1.)  # [m/s]
+    v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
 
-    
     return v_true, v_predicted, warning, error
