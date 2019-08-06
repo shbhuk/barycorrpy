@@ -104,6 +104,10 @@ def get_BC_vel(JDUTC,
             NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
                 The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
                 required. This matters at ~ m/s level and hence must be included.
+                
+            The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
+            Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
+            
             warning : Warning and Error message from the routine.                
             status : Status regarding warning and error message. Returns the following -
                     0 - No warning or error.
@@ -111,15 +115,16 @@ def get_BC_vel(JDUTC,
                     2 - Error message.
                     
         FOR SOLAR OBSERVATIONS            
-        If SolSystemTarget == Sun
+        If SolSystemTarget == 'Sun'
             v_true: The true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
                 If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument, 
                 then in this formulation, v_true will show the motion of the Sun, 
                 which is mostly dominated by the synodic period of Jupiter as seen from Earth.
             v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
                 This output returns the theoretical prediction for the redshift which includes the barycentric component.        
-                The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
-                Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
+
+            The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
+            Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
 
             warning : Warning and Error message from the routine.
             status : Status regarding warning and error message. Returns the following -
@@ -401,7 +406,7 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
     OUTPUT:
         FOR STELLAR OBSERVATIONS (not the Sun)
         If SolSystemTarget == None
-            weighted_vel : The barycenter-corrected RV (m/s) for the exposure as weighted by the flux from the exposure meter as defined in Wright & Eastman, 2014. 
+            weighted_v_true : The barycenter-corrected RV (m/s) for the exposure as weighted by the flux from the exposure meter as defined in Wright & Eastman, 2014. 
                     NOTE: This is not just the barycentric velocity that can be subtracted directly from the measured RV.
                     The measured RV must be entered in the code as zmeas. This is because the relativistic cross product between zbary and zmeas is
                     required. This matters at ~ m/s level and hence must be included.
@@ -422,8 +427,8 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                 which is mostly dominated by the synodic period of Jupiter as seen from Earth.
             weighted_v_predicted: Flux weighted ideal redshift measured for the Sun from Earth for given location and time.
                 This output returns the theoretical prediction for the redshift which includes the barycentric component.        
-                The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
-                Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
+            The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
+            Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
 
             JDUTCMID : The flux weighted midpoint time is returned. 
             warning : Warning and Error message from the routine
