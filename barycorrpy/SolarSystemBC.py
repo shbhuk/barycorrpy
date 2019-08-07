@@ -23,7 +23,7 @@ year = 365.25*3600*24 # [s]
 kmstoauyr = 1000 * year/(AU)
 
 
-def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
+def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True, predictive=False):
     """
     Perform barycentric correction for Solar observations.
     INPUTS:
@@ -41,15 +41,27 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
                 script directory.
         leap_update: If True, when the leap second file is more than 6 months old will attempt to download a new one.
                 If False, then will just give a warning message. Default is True.
-    OUTPUTS:
-        v_true: The true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
-                If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument,
-                then in this formulation, v_true will show the motion of the Sun,
-                which is mostly dominated by the synodic period of Jupiter as seen from Earth.
-        v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
-                This output returns the theoretical prediction for the redshift which includes the barycentric component.
 
-        The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
+        predictive : If True, then instead of returning v_true, returns v_predicted.
+        Default: False, and return is v_true from Wright and Eastman (2014)
+
+        See OUTPUTs for description
+
+    OUTPUTS:
+            If predictive = False
+                v_true: The true radial velocity of the Sun for an observer at the observatory but in an inertial frame not moving.
+                    If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument,
+                    then in this formulation, v_true will show the motion of the Sun,
+                    which is mostly dominated by the synodic period of Jupiter as seen from Earth.
+            Else if predictive = True
+                v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
+                    This output returns the theoretical prediction for the redshift which includes the barycentric component.
+                    This will be the measurement of a noiseless RV instrument observing the Sun.
+
+            The formula used is ztrue = ((1.+ zb)*(1.+ zmeas)-1.)
+            Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
+
+        The formula used is ztrue = ((1.+ zb)*(1.+ zmeas)-1.)
         Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
 
 
@@ -104,4 +116,9 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
 
-    return v_true, v_predicted, warning, error
+    if predictive:
+        vel = v_predicted
+    else:
+        vel = v_true
+
+    return vel, warning, error
