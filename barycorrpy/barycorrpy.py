@@ -95,6 +95,7 @@ def get_BC_vel(JDUTC,
                     4. ephemeris
                     5. leap_dir
                     6. leap_update
+                    7. predictive
 
         predictive : If True, then instead of returning v_true, returns v_predicted.
                      Default: False, and return is v_true from Wright and Eastman (2014)
@@ -409,6 +410,7 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                     4. ephemeris
                     5. leap_dir
                     6. leap_update
+                    7. predictive
 
         predictive : If True, then instead of returning v_true, returns v_predicted.
                 Default: False, and return is v_true from Wright and Eastman (2014)

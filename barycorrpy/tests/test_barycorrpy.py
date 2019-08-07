@@ -69,6 +69,23 @@ class Barycorrpy_tests(unittest.TestCase):
 
         self.assertTrue(np.allclose([corr_time[0]],[2458000.00505211,  2458000.00506211,  2458000.00507211],atol = 1e-7, rtol = 0))
 
+    def test_stellar_predictive(self):
+        JDUTC = 2458000
+        result5 = get_BC_vel(JDUTC=JDUTC, hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9, ephemeris='de430', zmeas=0.0, predictive=True)
+
+        self.assertTrue(np.isclose(a = result5[0], b = -15403.15938, atol = 1e-2, rtol = 0))
+
+
+    def test_SolarBC(self):
+        JDUTC = 2458000
+
+        result6 = get_BC_vel(JDUTC=JDUTC, lat=-30.169283, longi=-70.806789, alt=2241.9, zmeas=0.0, SolSystemTarget='Sun')
+        self.assertTrue(np.isclose(a = result6[0], b = 813.156, atol = 1e-2, rtol = 0))
+
+
+
+
+
 
 def main():
     unittest.main()
