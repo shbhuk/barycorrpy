@@ -84,7 +84,7 @@ def run_sample():
 
             result6 = get_BC_vel(JDUTC=2458000, lat=-30.169283, longi=-70.806789, alt=2241.9, zmeas=0.0, SolSystemTarget='Sun')
 
-            if np.isclose(a = result6[0], b = 813.156, atol = 1e-2, rtol = 0):
+            if np.isclose(a = result6[0], b = 176.8438, atol = 1e-2, rtol = 0):
                 a.append('result6')
                 b+=1
 
@@ -92,6 +92,6 @@ def run_sample():
             if b==7:
                 print('***********SUCCESS**************\nAll barycentric correction velocities match expected values to 1 cm/s\n')
             else:
-                print('{} out of 6 results match. Compare outputs vs those on the github wiki. Check others - \n'.format(b,a))
+                print('{} out of 7 results match. Compare outputs vs those on the github wiki. Check others - \n'.format(b,a))
 
             return result, result2, result3, result4, JDUTCMID, warning4, status4, corr_time, result5, result6

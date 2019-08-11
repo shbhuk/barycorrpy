@@ -6,7 +6,6 @@ import datetime
 import numpy as np
 import sys
 import math
-import astropy.constants as ac
 import astropy
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import get_body_barycentric_posvel
@@ -19,13 +18,9 @@ else:
 
 from . import PINT_erfautils as PINT
 from .utils import get_stellar_data,find_hip
+from .PhysicalConstants import *
 
-# Parsing constants #
-AU = ac.au.value # [m]
-c = ac.c.value # Speed of light [m/s]
-pctoau = 3600*180/np.pi # No. of AU in one parsec
-year = 365.25*3600*24 # [s]
-kmstoauyr = year/(1000*AU)
+
 
 def staleness_check(file_time,now):
     '''
