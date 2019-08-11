@@ -14,13 +14,7 @@ from . import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
 from .utils import flux_weighting,get_stellar_data
-
-
-AU = ac.au.value # [m]
-c = ac.c.value # Speed of light [m/s]
-pctoau = 3600*180/np.pi # No. of AU in one parsec
-year = 365.25*3600*24 # [s]
-kmstoauyr = 1000 * year/(AU)
+from .PhysicalConstants import *
 
 
 def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True, predictive=False):
@@ -92,15 +86,15 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     ## Ignoring retarded time for now##
 
-    target_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
+    solar_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
 
-    r_target = target_ephem[0].xyz.value*1000. #[m]
-    v_target = target_ephem[1].xyz.value*1000./86400.  # [m/s]
-    beta_target = v_target / c
+    r_solar = solar_ephem[0].xyz.value*1000. #[m]
+    v_solar = solar_ephem[1].xyz.value*1000./86400.  # [m/s]
+    beta_solar = v_solar / c
 
-    gamma_target = 1. / np.sqrt(1.-sum(beta_target**2))
+    gamma_solar = 1. / np.sqrt(1.-sum(beta_solar**2))
 
-    Pos_vector = r_target - r_earth
+    Pos_vector = r_solar - r_earth
     Pos_mag = np.sqrt(sum(Pos_vector**2)) #[m]
     Pos_hat = Pos_vector/Pos_mag
 
@@ -109,9 +103,9 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
 
-    zpredicted= ( (gamma_target * (1 + np.dot(beta_target,Pos_hat))*(1+zGREarth)) / (gamma_earth * (1 + np.dot(beta_earth,Pos_hat)) * (1+zGRSun))  ) - 1
+    zpredicted= ( (gamma_solar * (1 + np.dot(beta_solar,Pos_hat))*(1+zGREarth)) / (gamma_earth * (1 + np.dot(beta_earth,Pos_hat)) * (1+zGRSun))  ) - 1
 
-    zb = ((gamma_earth*(1 + np.dot(beta_earth,Pos_hat))) / (1+zGREarth)) - 1
+    zb = ((gamma_earth*(1 + np.dot(beta_earth,Pos_hat))*(1+zGRSun)) / (1+zGREarth)) - 1
 
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
