@@ -80,7 +80,7 @@ class Barycorrpy_tests(unittest.TestCase):
         JDUTC = 2458000
 
         result6 = get_BC_vel(JDUTC=JDUTC, lat=-30.169283, longi=-70.806789, alt=2241.9, zmeas=0.0, SolSystemTarget='Sun')
-        self.assertTrue(np.isclose(a = result6[0], b = 813.156, atol = 1e-2, rtol = 0))
+        self.assertTrue(np.isclose(a = result6[0], b = 176.8438, atol = 1e-2, rtol = 0))
 
 
 
