@@ -13,7 +13,7 @@ import os
 from . import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
-from .utils import flux_weighting,get_stellar_data
+from .utils import flux_weighting, get_stellar_data, CalculatePositionVector
 from .PhysicalConstants import *
 
 
@@ -93,10 +93,8 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     beta_solar = v_solar / c
 
     gamma_solar = 1. / np.sqrt(1.-sum(beta_solar**2))
-
-    Pos_vector = r_solar - r_earth
-    Pos_mag = np.sqrt(sum(Pos_vector**2)) #[m]
-    Pos_hat = Pos_vector/Pos_mag
+    
+    Pos_vector, Pos_mag, Pos_hat = CalculatePositionVector(r1=r_solar, r2=r_earth)
 
     zGREarth =  ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
                 + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(Pos_vector**2))))
@@ -116,3 +114,6 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
         vel = v_true
 
     return vel, warning, error
+  
+
+    

@@ -13,7 +13,7 @@ from . import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
 from .SolarSystemBC import SolarBarycentricCorrection
-from .utils import flux_weighting,get_stellar_data
+from .utils import flux_weighting, get_stellar_data, CalculatePositionVector
 from .PhysicalConstants import *
 
 ### Need to install jplephem ###
@@ -304,9 +304,7 @@ def BCPy(JDUTC,
             pos_obj = jplephem.xyz.value*1000. # [m]
 
         # Vector from object barycenter to Observatory
-        X = np.array(r_obs-pos_obj)
-        Xmag = math.sqrt(sum(X*X)) # [m]
-        Xhat = X / Xmag # Unitless
+        X, Xmag, Xhat = CalculatePositionVector(r1=r_obs, r2=pos_obj)
 
         # Add Shapiro Delay
         a = np.dot((rhohat-np.dot(Xhat,rhohat)*Xhat), beta_earth)
