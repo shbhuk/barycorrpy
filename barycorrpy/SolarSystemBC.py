@@ -75,39 +75,39 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     ##### EPHEMERIDES #####
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    r_earth = r_eci + earth_geo[0].xyz.value*1000. # [m]
+    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
     v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
 
     # Relativistic Addition of Velocities
-    v_earth = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
-    beta_earth = v_earth / c
+    VelVector_EarthSSB = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
+    BetaEarth = VelVector_EarthSSB / c
 
-    gamma_earth = 1. / np.sqrt(1.-sum(beta_earth**2))
+    GammaEarth = 1. / np.sqrt(1.-sum(BetaEarth**2))
 
     ## Ignoring retarded time for now##
 
     solar_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
 
-    r_solar = solar_ephem[0].xyz.value*1000. #[m]
-    v_solar = solar_ephem[1].xyz.value*1000./86400.  # [m/s]
-    beta_solar = v_solar / c
+    PosVector_SolSSB = solar_ephem[0].xyz.value*1000. #[m]
+    VelVector_SolSSB = solar_ephem[1].xyz.value*1000./86400.  # [m/s]
+    BetaSolar = VelVector_SolSSB / c
 
-    gamma_solar = 1. / np.sqrt(1.-sum(beta_solar**2))
+    GammaSolar = 1. / np.sqrt(1.-sum(BetaSolar**2))
 
-    Pos_vector, Pos_mag, Pos_hat = CalculatePositionVector(r1=r_solar, r2=r_earth)
+    PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
 
     # To correct for redshift experienced by photon due to Earth's gravity well,
     # also as it travels further in the Sol System from the Sun to the position of the Earth (Solar gravity well)
     # Correcting for this should give a blue shift.
     zGREarth =  ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
-                + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(Pos_vector**2))))
+                + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(PosVector_SolEarth**2))))
 
     # To correct for redshift experienced by photon and place it in the SSB
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
 
-    zpredicted= ( (gamma_solar * (1 + np.dot(beta_solar,Pos_hat))*(1+zGREarth)) / (gamma_earth * (1 + np.dot(beta_earth,Pos_hat)) * (1+zGRSun))  ) - 1
+    zpredicted= ( (GammaSolar * (1 + np.dot(BetaSolar,PosHat_SolEarth))*(1+zGREarth)) / (GammaEarth * (1 + np.dot(BetaEarth,PosHat_SolEarth)) * (1+zGRSun))  ) - 1
 
-    zb = ((gamma_earth*(1 + np.dot(beta_earth,Pos_hat))*(1+zGRSun)) / (1+zGREarth)) - 1
+    zb = ((GammaEarth*(1 + np.dot(BetaEarth,PosHat_SolEarth))*(1+zGRSun)) / (1+zGREarth)) - 1
 
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]

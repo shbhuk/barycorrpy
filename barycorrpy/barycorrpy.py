@@ -245,12 +245,12 @@ def BCPy(JDUTC,
     ##### EPHEMERIDES #####
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    r_obs = r_eci + earth_geo[0].xyz.value*1000. # [m]
+    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
     v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
 
     # Relativistic Addition of Velocities
-    v_obs = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
-    beta_earth = v_obs / c
+    VelVector_EarthSSB = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
+    BetaEarth = VelVector_EarthSSB / c
 
     ##### Convert Star RA DEC to R0hat vector #####
 
@@ -278,16 +278,16 @@ def BCPy(JDUTC,
 
     # Parallax correction #
     if px>0:
-        rho = 1000.*rhat/px*pctoau - r_obs/AU # [AU]
+        rho = 1000.*rhat/px*pctoau - PosVector_EarthSSB/AU # [AU]
         rhohat = rho / math.sqrt(sum(rho*rho)) # Unitless
         r0 = 1000./px*pctoau*AU # [m]
-        beta_star = r0*mu/c/year + rv*r0hat/c
+        BetaStar = r0*mu/c/year + rv*r0hat/c
 
         zlighttravel = rv*r0*sum(mu*mu)*T/(year*c*c)
 
     else:
         rhohat = rhat
-        beta_star = [0., 0., 0.]
+        BetaStar = [0., 0., 0.]
         zlighttravel = 0.
 
 
@@ -298,29 +298,29 @@ def BCPy(JDUTC,
 
     for ss_body in ss_bodies:
         if ss_body == 'Earth':
-            pos_obj = earth_geo[0].xyz.value*1000. # [m]
+            PosVector_SSObject = earth_geo[0].xyz.value*1000. # [m]
         else:
             jplephem = get_body_barycentric(ss_body, JDTDB, ephemeris=ephemeris)
-            pos_obj = jplephem.xyz.value*1000. # [m]
+            PosVector_SSObject = jplephem.xyz.value*1000. # [m]
 
         # Vector from object barycenter to Observatory
-        X, Xmag, Xhat = CalculatePositionVector(r1=r_obs, r2=pos_obj)
+        PosVector_EarthSSObject, PosMag_EarthSSObject, PosHat_EarthSSObject = CalculatePositionVector(r1=PosVector_EarthSSB, r2=PosVector_SSObject)
 
         # Add Shapiro Delay
-        a = np.dot((rhohat-np.dot(Xhat,rhohat)*Xhat), beta_earth)
-        zshapiro += -2.*GM[ss_body]*a / ((c*c)*Xmag*(1+np.dot(Xhat, rhohat)))   # Eq 27
+        a = np.dot((rhohat-np.dot(PosHat_EarthSSObject,rhohat)*PosHat_EarthSSObject), BetaEarth)
+        zshapiro += -2.*GM[ss_body]*a / ((c*c)*PosMag_EarthSSObject*(1+np.dot(PosHat_EarthSSObject, rhohat)))   # Eq 27
 
-        if Xmag:
-            Sum_GR += GM[ss_body] / Xmag  # [(m/s)^2]
+        if PosMag_EarthSSObject:
+            Sum_GR += GM[ss_body] / PosMag_EarthSSObject  # [(m/s)^2]
 
     zgravity = 1./(1+Sum_GR/(c*c)) - 1
 
 
     ##### Determine the Barycentric RV correction (Eq 28) #####
 
-    gamma_earth = 1. / math.sqrt(1.-sum(beta_earth**2))
+    GammaEarth = 1. / math.sqrt(1.-sum(BetaEarth**2))
 
-    zb = -1. - zshapiro - zlighttravel + gamma_earth*(1+np.dot(beta_earth, rhohat))*(1+np.dot(r0hat, beta_star))/((1.+np.dot(beta_star, rhohat))*(1.+zgravity)) # Eq 28
+    zb = -1. - zshapiro - zlighttravel + GammaEarth*(1+np.dot(BetaEarth, rhohat))*(1+np.dot(r0hat, BetaStar))/((1.+np.dot(BetaStar, rhohat))*(1.+zgravity)) # Eq 28
 
     if not predictive:
         v_final = c * ((1.+zb)*(1.+zmeas)-1.)  # [m/s]
