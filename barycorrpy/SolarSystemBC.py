@@ -93,12 +93,16 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     beta_solar = v_solar / c
 
     gamma_solar = 1. / np.sqrt(1.-sum(beta_solar**2))
-    
+
     Pos_vector, Pos_mag, Pos_hat = CalculatePositionVector(r1=r_solar, r2=r_earth)
 
+    # To correct for redshift experienced by photon due to Earth's gravity well,
+    # also as it travels further in the Sol System from the Sun to the position of the Earth (Solar gravity well)
+    # Correcting for this should give a blue shift.
     zGREarth =  ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
                 + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(Pos_vector**2))))
 
+    # To correct for redshift experienced by photon and place it in the SSB
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
 
     zpredicted= ( (gamma_solar * (1 + np.dot(beta_solar,Pos_hat))*(1+zGREarth)) / (gamma_earth * (1 + np.dot(beta_earth,Pos_hat)) * (1+zGRSun))  ) - 1
@@ -114,6 +118,3 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
         vel = v_true
 
     return vel, warning, error
-  
-
-    

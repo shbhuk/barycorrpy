@@ -8,7 +8,7 @@ c = ac.c.value # Speed of light [m/s]
 pctoau = 3600*180/np.pi # No. of AU in one parsec
 SECS_PER_DAY = 3600 * 24
 year = 365.25*SECS_PER_DAY # [s]
-kmstoauyr = 1000 * year/(AU)
+kmstoauyr = 1000 * year/(AU) #km/s to AU/year
 
 M_moon = 73476730924573500000000 # Mass of the Moon [kg]
 
