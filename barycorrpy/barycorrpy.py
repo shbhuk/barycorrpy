@@ -12,7 +12,7 @@ import os
 from . import find_hip
 from . import PINT_erfautils as PINT
 from . import utc_tdb
-from .SolarSystemBC import SolarBarycentricCorrection
+from .SolarSystemBC import SolarBarycentricCorrection, ReflectedLightBarycentricCorrection
 from .utils import flux_weighting, get_stellar_data, CalculatePositionVector
 from .PhysicalConstants import *
 
@@ -24,7 +24,7 @@ def get_BC_vel(JDUTC,
        starname= '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True, predictive=False,
-       SolSystemTarget=None):
+       SolSystemTarget=None, HorizonsID_type='smallbody'):
     '''
     Barycentric Velocity Correction at the 1 cm/s level, as explained in Wright & Eastman, 2014.
     Calling procedure for barycorrpy. Accepts vector time object (i.e., multiple observation JD values).
@@ -115,10 +115,22 @@ def get_BC_vel(JDUTC,
                     If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument,
                     then in this formulation, v_true will show the motion of the Sun,
                     which is mostly dominated by the synodic period of Jupiter as seen from Earth.
+                    Our barycentric correction includes the gravitational redshift of the Sun, and therefore the true
+                    velocity (or redshift) is centered at 0 m/s.
             Else if predictive = True
                 v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
                     This output returns the theoretical prediction for the redshift which includes the barycentric component.
                     This will be the measurement of a noiseless RV instrument observing the Sun.
+        Else:
+            Computing the barycentric corrections for reflected light observations of a target in the Solar system
+            If predictive = False
+                v_true: The true radial velocity of the SolSystemTarget for an observer at the observatory but in an inertial frame not moving.
+                    If zmeas is included to show the measured absolute redshift for the SolSystemTarget as measured by an instrument,
+                    then in this formulation, v_true will show the motion of the SolSystemTarget.
+            Else if predictive = True
+                v_predicted: Ideal redshift measured for the SolSystemTarget from Earth for given location and time.
+                    This output returns the theoretical prediction for the redshift which includes the barycentric component.
+                    This will be the measurement of a noiseless RV instrument observing the SolSystemTarget.
 
             The formula used is ztrue = ((1.+zb)*(1.+zmeas)-1.)
             Therefore if zmeas is set to 0, then ztrue = zb. The velocities are just the redshift (z) x speed of light (c).
@@ -206,7 +218,14 @@ def get_BC_vel(JDUTC,
             warning.append(a[1])
             error.append(a[2])
 
-    else: print('Incorrect SolSystemTarget keyword')
+    else:
+        vel = []
+        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
+            a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive)
+            vel.append(a[0])
+            warning.append(a[1])
+            error.append(a[2])
     # Status messages to check for warning or error
     if not all(vel): error += ['Check inputs. Error in code']
     if any(error):   status |= 2
@@ -335,7 +354,7 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
        starname = '', hip_id=None, ra=None, dec=None, epoch=None, pmra=None, pmdec=None, px=None, rv=None,
        obsname='', lat=0., longi=0., alt=0., zmeas=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True,
-       SolSystemTarget=None, predictive=False):
+       SolSystemTarget=None, HorizonsID_type='smallbody', predictive=False):
 
     '''
     Calculate Barycentric velocity weighted by flux from exposure meter to account for long exposure time.
@@ -461,14 +480,9 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
         vel,warning,status = get_BC_vel(JDUTC=JDUTC,
                                     starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
                                     obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                    rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update, SolSystemTarget=SolSystemTarget, predictive=predictive)
+                                    rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update,
+                                    SolSystemTarget=SolSystemTarget, HorizonsID_type=HorizonsID_type, predictive=predictive)
 
-    ## SOLAR OBSERVATIONS ##
-    elif SolSystemTarget == 'Sun':
-        vel, warning, status = get_BC_vel(JDUTC=JDUTC,
-                                    starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
-                                    obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                    rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update, SolSystemTarget=SolSystemTarget, predictive=predictive)
 
 
     ## Weight it by flux ##

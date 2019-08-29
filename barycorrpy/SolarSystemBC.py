@@ -121,7 +121,8 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     return vel, warning, error
 
 
-def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True, predictive=False):
+def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, HorizonsID_type='smallbody',
+    ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True, predictive=False):
     """
     Computing the barycentric corrections for reflected light observations of a target in the Solar system.
 
@@ -177,12 +178,12 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, ep
 
     # Reflecting object
     # First find the light travel time for Object with respect to Observatory
-    TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB).ephemerides()
+    TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).ephemerides()
     EarthTargetLightTravel = TargetObj1['lighttime'][0]*60 # Units of seconds
 
     # Subtract light time and find pos and vel for target wrt SSB
     TargetObjTime = JDTDB - (EarthTargetLightTravel/SECS_PER_DAY)
-    TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime)
+    TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime, id_type=HorizonsID_type)
     TargetVectors = TargetObj2.vectors(refplane='earth')
     TargetSSBLightTravel = TargetVectors['lighttime'][0]*SECS_PER_DAY # Units of seconds
 
@@ -219,7 +220,7 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, ep
     v_eci = v_pint[0]  # [m/s]
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    r_earth = r_eci + earth_geo[0].xyz.value*1000. # [m]
+    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
     v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
     VelVector_EarthSSB = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
 
@@ -227,9 +228,19 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, ep
     GammaEarth = 1. / np.sqrt(1.-sum(BetaEarth**2))
 
 
-
+    PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
     PosVector_SolTarget, PosMag_SolTarget, PosHat_SolTarget = CalculatePositionVector(PosVector_SolSSB, PosVector_TargetSSB)
-    PosVector_TargetEarth, PosMag_TargetEarth, PosHat_TargetEarth = CalculatePositionVector(PosVector_TargetSSB, r_earth)
+    PosVector_TargetEarth, PosMag_TargetEarth, PosHat_TargetEarth = CalculatePositionVector(PosVector_TargetSSB, PosVector_EarthSSB)
+
+    # To correct for redshift experienced by photon due to Earth's gravity well,
+    # also as it travels further in the Sol System from the Sun to the position of the Earth (Solar gravity well)
+    # Correcting for this should give a blue shift.
+    zGREarth =  ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
+                + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(PosVector_SolEarth**2))))
+
+    # To correct for redshift experienced by photon and place it in the SSB
+    zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
+
 
     zpredicted = ((GammaSolar * (1 + np.dot(BetaSolar, PosHat_SolTarget)) * (1 + np.dot(BetaTarget, PosHat_TargetEarth)))  \
                     /(GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)))) - 1
