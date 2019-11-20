@@ -21,6 +21,8 @@ from .PhysicalConstants import *
 def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True, predictive=False):
     """
     Perform barycentric correction for Solar observations.
+    In the solar case, ignores retarded time, i.e. the change in position angle of the Sun wrt the observatory in the 8 minutes it takes for the light to reach Earth.
+    This is because the Solar velocity is low enough (~ 10m/s), that in 8 mins the change in position over 1 AU is negligible.
     INPUTS:
         JDUTC: Astropy Time object in UTC scale with JD format
         loc: Astropy EarthLocation Object)
@@ -177,15 +179,20 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
                 'elevation': alt}
 
     # Reflecting object
-    # First find the light travel time for Object with respect to Observatory
-    TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).ephemerides()
-    EarthTargetLightTravel = TargetObj1['lighttime'][0]*60 # Units of seconds
+    # First find the light travel time for Object with respect to observatory.
+
+    try:
+        TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).vectors()
+    except ValueError:
+        warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
+        TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB, id_type=HorizonsID_type).vectors()
+    EarthTargetLightTravel = TargetObj1['lighttime'][0] #days
 
     # Subtract light time and find pos and vel for target wrt SSB
-    TargetObjTime = JDTDB - (EarthTargetLightTravel/SECS_PER_DAY)
+    TargetObjTime = JDTDB - (EarthTargetLightTravel)
     TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime, id_type=HorizonsID_type)
     TargetVectors = TargetObj2.vectors(refplane='earth')
-    TargetSSBLightTravel = TargetVectors['lighttime'][0]*SECS_PER_DAY # Units of seconds
+    TargetSSBLightTravel = TargetVectors['lighttime'][0] #days
 
     [TargetVectors[i].convert_unit_to('m') for i in ['x','y','z']] # Convert from AU to km
     [TargetVectors[i].convert_unit_to('m/s') for i in ['vx','vy','vz']] # Convert from AU/d to km/d
@@ -196,13 +203,13 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     ## SUN
     # First find the light travel time for Sun with respect to Observatory
     #SolObj1 = Horizons(id='Sun', location='@0', epochs=JDTDB, id_type='majorbody').ephemerides()
-    #SolSSBLightTravel = SolObj1['lighttime'][0]*60 # Units of days
+    #SolSSBLightTravel = SolObj1['lighttime'][0] # Units of days
 
 
     # Ignoring difference in light travel time between the Sun and SSB for finding the Solar vectors
     # Subtract light time and find pos and vel for Sun wrt SSB
     TargetSolLightTravelDelay = EarthTargetLightTravel + TargetSSBLightTravel
-    SolObj2 = Horizons(id='Sun', location='@0', epochs=JDTDB-(TargetSolLightTravelDelay)/SECS_PER_DAY, id_type='majorbody')
+    SolObj2 = Horizons(id='Sun', location='@0', epochs=JDTDB-(TargetSolLightTravelDelay), id_type='majorbody')
     SolVectors = SolObj2.vectors(refplane='earth')
 
     [SolVectors[i].convert_unit_to('m') for i in ['x','y','z']]
