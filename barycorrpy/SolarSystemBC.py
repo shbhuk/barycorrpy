@@ -242,8 +242,8 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     # To correct for redshift experienced by photon due to Earth's gravity well,
     # also as it travels further in the Sol System from the Sun to the position of the Earth (Solar gravity well)
     # Correcting for this should give a blue shift.
-    zGREarth =  ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
-                + ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(PosVector_SolEarth**2))))
+    zGREarth =  - ac.G.value * ac.M_earth.value / ((ac.c.value**2)*(np.sqrt(np.sum(r_eci**2))))\
+                - ac.G.value * ac.M_sun.value / ((ac.c.value**2)*(np.sqrt(np.sum(PosVector_SolEarth**2))))
 
     # To correct for redshift experienced by photon and place it in the SSB
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
