@@ -249,10 +249,11 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
 
 
-    zpredicted = ((GammaSolar * (1 + np.dot(BetaSolar, PosHat_SolTarget)) * (1 + np.dot(BetaTarget, PosHat_TargetEarth)))  \
-                    /(GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)))) - 1
+    zpredicted = ((GammaSolar * (1 + np.dot(BetaSolar, PosHat_SolTarget)) * (1 + np.dot(BetaTarget, PosHat_TargetEarth))) /
+                    (GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)))) - 1
 
-    zb = (GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)) / (1 + np.dot(BetaTarget, PosHat_TargetEarth))) - 1
+    zb = (GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)) /
+            (1 + np.dot(BetaTarget, PosHat_TargetEarth))) - 1
 
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
