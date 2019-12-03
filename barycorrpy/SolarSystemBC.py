@@ -108,7 +108,8 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     # To correct for redshift experienced by photon and place it in the SSB
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
 
-    zpredicted= ( (GammaSolar * (1 + np.dot(BetaSolar,PosHat_SolEarth))*(1+zGREarth)) / (GammaEarth * (1 + np.dot(BetaEarth,PosHat_SolEarth)) * (1+zGRSun))  ) - 1
+    zpredicted= ( (GammaSolar * (1 + np.dot(BetaSolar,PosHat_SolEarth))*(1+zGREarth)) /
+                (GammaEarth * (1 + np.dot(BetaEarth,PosHat_SolEarth)) * (1+zGRSun))  ) - 1
 
     zb = ((GammaEarth*(1 + np.dot(BetaEarth,PosHat_SolEarth))*(1+zGRSun)) / (1+zGREarth)) - 1
 
