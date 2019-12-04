@@ -268,7 +268,7 @@ def BCPy(JDUTC,
     v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
 
     # Relativistic Addition of Velocities
-    VelVector_EarthSSB = (v_eci+v_geo) / (1.+v_eci*v_geo/c**2) # [m/s]
+    VelVector_EarthSSB = (v_eci+v_geo) / (1.+np.sum(v_eci*v_geo)/c**2) # [m/s]
     BetaEarth = VelVector_EarthSSB / c
 
     ##### Convert Star RA DEC to R0hat vector #####
@@ -279,7 +279,7 @@ def BCPy(JDUTC,
     # Eq 14 to 17
     up = [0., 0., 1.]
     east = np.cross(up, r0hat)
-    east = east / math.sqrt(sum(east*east))
+    east = east / math.sqrt(np.sum(east*east))
     north = np.cross(r0hat, east)
     mu = (pmra*east+pmdec*north)/pctoau/1000 # Divided by 1000 since the Proper motion is in milli-arcseconds.
 
@@ -293,16 +293,16 @@ def BCPy(JDUTC,
     vpi = rv/1.e3 * kmstoauyr * (px/1.e3/pctoau)   # [rad/yr]
     vel = mu + vpi*r0hat                           # [rad/yr] (m in AA)
     r = r0hat + vel*T                              # [rad]    (p1 in AA)
-    rhat = r / math.sqrt(sum(r*r))
+    rhat = r / math.sqrt(np.sum(r*r))
 
     # Parallax correction #
     if px>0:
         rho = 1000.*rhat/px*pctoau - PosVector_EarthSSB/AU # [AU]
-        rhohat = rho / math.sqrt(sum(rho*rho)) # Unitless
+        rhohat = rho / math.sqrt(np.sum(rho*rho)) # Unitless
         r0 = 1000./px*pctoau*AU # [m]
         BetaStar = r0*mu/c/year + rv*r0hat/c
 
-        zlighttravel = rv*r0*sum(mu*mu)*T/(year*c*c)
+        zlighttravel = rv*r0*np.sum(mu*mu)*T/(year*c*c)
 
     else:
         rhohat = rhat
@@ -337,7 +337,7 @@ def BCPy(JDUTC,
 
     ##### Determine the Barycentric RV correction (Eq 28) #####
 
-    GammaEarth = 1. / math.sqrt(1.-sum(BetaEarth**2))
+    GammaEarth = 1. / math.sqrt(1.- np.sum(BetaEarth**2))
 
     zb = -1. - zshapiro - zlighttravel + GammaEarth*(1+np.dot(BetaEarth, rhohat))*(1+np.dot(r0hat, BetaStar))/((1.+np.dot(BetaStar, rhohat))*(1.+zgravity)) # Eq 28
 
