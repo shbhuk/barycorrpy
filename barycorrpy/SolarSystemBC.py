@@ -111,10 +111,15 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     zpredicted= ( (GammaSolar * (1 + np.dot(BetaSolar,PosHat_SolEarth))*(1+zGREarth)) /
                 (GammaEarth * (1 + np.dot(BetaEarth,PosHat_SolEarth)) * (1+zGRSun))  ) - 1
 
-    zb = ((GammaEarth*(1 + np.dot(BetaEarth,PosHat_SolEarth))*(1+zGRSun)) / (1+zGREarth)) - 1
+    zb = ((GammaEarth*(1 + np.dot(BetaEarth,PosHat_SolEarth))) / (1+zGREarth)) - 1
 
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
+
+    GR = (1+zGREarth)/(1+zGRSun)
+    SR = GammaSolar/GammaEarth
+    Classical = 1 + (1 + np.dot(BetaEarth,PosHat_SolEarth)) / 1 + (1 + np.dot(BetaSolar,PosHat_SolEarth))
+
 
     if predictive:
         vel = v_predicted
@@ -122,6 +127,7 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
         vel = v_true
 
     return vel, warning, error
+    # return vel, GR, SR, Classical
 
 
 def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, HorizonsID_type='smallbody',
