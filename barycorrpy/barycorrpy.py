@@ -339,7 +339,8 @@ def BCPy(JDUTC,
 
     GammaEarth = 1. / math.sqrt(1.- np.sum(BetaEarth**2))
 
-    zb = -1. - zshapiro - zlighttravel + GammaEarth*(1+np.dot(BetaEarth, rhohat))*(1+np.dot(r0hat, BetaStar))/((1.+np.dot(BetaStar, rhohat))*(1.+zgravity)) # Eq 28
+    zb = -1. - zshapiro - zlighttravel + \
+        GammaEarth*(1+np.dot(BetaEarth, rhohat))*(1+np.dot(r0hat, BetaStar))/((1.+np.dot(BetaStar, rhohat))*(1.+zgravity)) # Eq 28
 
     if not predictive:
         v_final = c * ((1.+zb)*(1.+zmeas)-1.)  # [m/s]
