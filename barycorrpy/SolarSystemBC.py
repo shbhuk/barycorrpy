@@ -116,10 +116,6 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
 
-    GR = (1+zGREarth)/(1+zGRSun)
-    SR = GammaSolar/GammaEarth
-    Classical = 1 + (1 + np.dot(BetaEarth,PosHat_SolEarth)) / 1 + (1 + np.dot(BetaSolar,PosHat_SolEarth))
-
 
     if predictive:
         vel = v_predicted
@@ -127,7 +123,6 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
         vel = v_true
 
     return vel, warning, error
-    # return vel, GR, SR, Classical
 
 
 def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, HorizonsID_type='smallbody',
@@ -239,7 +234,7 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
 
     BetaEarth = VelVector_EarthSSB / c
-    GammaEarth = 1. / np.sqrt(1.-sum(BetaEarth**2))
+    GammaEarth = 1. / np.sqrt(1. - np.sum(BetaEarth**2))
 
 
     PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
@@ -254,12 +249,17 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     # To correct for redshift experienced by photon and place it in the SSB
     zGRSun =  - (ac.G.value * ac.M_sun.value) / ((ac.c.value**2) * (np.sqrt(np.sum(ac.R_sun.value**2))))
 
+    zGR = (1+zGREarth)/(1+zGRSun)
+    zSR = GammaSolar/GammaEarth
+    zClassical1 = (1 + np.dot(BetaSolar, PosHat_SolTarget))/(1 + np.dot(BetaTarget, PosHat_SolTarget))
+    zClassical2 =  (1 + np.dot(BetaTarget, PosHat_TargetEarth))/(1 + np.dot(BetaEarth, PosHat_TargetEarth))
 
-    zpredicted = ((GammaSolar * (1 + np.dot(BetaSolar, PosHat_SolTarget)) * (1 + np.dot(BetaTarget, PosHat_TargetEarth))) /
-                    (GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)))) - 1
 
-    zb = (GammaEarth * (1 + np.dot(BetaTarget, PosHat_SolTarget)) * (1 + np.dot(BetaEarth, PosHat_TargetEarth)) /
-            (1 + np.dot(BetaTarget, PosHat_TargetEarth))) - 1
+    zpredicted = zGR*zSR*zClassical1*zClassical2 - 1
+
+    zb = (GammaEarth * (1+np.dot(BetaEarth, PosHat_TargetEarth)) * \
+        (1 + np.dot(BetaTarget, PosHat_SolTarget))/(1 + np.dot(BetaTarget, PosHat_TargetEarth)) \
+        / (1+zGREarth)) - 1
 
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
