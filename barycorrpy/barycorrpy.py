@@ -67,8 +67,8 @@ def get_BC_vel(JDUTC,
                 script directory.
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
-        SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
-                To correct for Solar RV observations set Target = 'Sun', for reflected light observations ...?
+        SolSystemTarget : When running barycentric correction for a stellar target, SolSystemTarget = None. Default value = None
+                To correct for Solar RV observations set SolSystemTarget = 'Sun', for reflected light observations ...?
                 For Solar observations:
                 Only inputs required are -
                     1. JDUTC
@@ -209,7 +209,7 @@ def get_BC_vel(JDUTC,
             error.append(a[2])
 
     ## SOLAR OBSERVATIONS ##
-    elif SolSystemTarget == 'Sun':
+    elif SolSystemTarget == 'Sun' or SolSystemTarget == 'Sol':
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = SolarBarycentricCorrection(JDUTC=jdutc, loc=loc, zmeas=zm,
