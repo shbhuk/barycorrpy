@@ -99,8 +99,8 @@ def gcrs_posvel_from_itrf(loc, toas,tts):
     #xp = np.interp(mjds, iers_tab['MJD'], iers_tab['PM_X_B']) * asec2rad
     #yp = np.interp(mjds, iers_tab['MJD'], iers_tab['PM_Y_B']) * asec2rad
     # Get X and Y from IERS B in arcsec and convert to radians
-    xp = np.interp(mjds, iers_tab['MJD'], iers_tab['PM_x']) * asec2rad
-    yp = np.interp(mjds, iers_tab['MJD'], iers_tab['PM_y']) * asec2rad
+    xp = np.interp(mjds, iers_tab['MJD'].value, iers_tab['PM_x'].value) * asec2rad
+    yp = np.interp(mjds, iers_tab['MJD'].value, iers_tab['PM_y'].value) * asec2rad
 
     # Get the polar motion matrices
     rpm = erfa.pom00(xp, yp, sp)
