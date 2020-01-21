@@ -15,7 +15,7 @@ def run_sample():
             # Observatory location manually entered. Stellar positional parameters taken from Hipparcos Catalogue
             result = get_BC_vel(JDUTC=JDUTC, hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9, ephemeris='de430', zmeas=0.0)
 
-            if np.isclose(a = result[0], b = 15403.9508, atol = 1e-2, rtol = 0):
+            if np.isclose(a=result[0], b=15403.9508, atol=1e-2, rtol=0):
                 a.append('result')
                 b+=1
 
@@ -25,7 +25,7 @@ def run_sample():
             JDUTC = Time(2458000, format='jd', scale='utc')
             result2  = get_BC_vel(JDUTC=JDUTC, hip_id=8102, obsname='CTIO', ephemeris='de430')
 
-            if np.isclose(a = result2[0], b = 15403.9608, atol = 1e-2, rtol = 0):
+            if np.isclose(a=result2[0], b=15403.9608, atol=1e-2, rtol=0):
                 a.append('result2')
                 b+=1
 
@@ -51,7 +51,7 @@ def run_sample():
             result3=get_BC_vel(JDUTC=JDUTC, ra=ra, dec=dec, obsname=obsname, lat=lat, longi=longi, alt=alt, pmra=pmra,
                 pmdec=pmdec, px=px, rv=rv, zmeas=zmeas,epoch=epoch, ephemeris=ephemeris, leap_update=True)
 
-            if np.allclose([result3[0][0],result3[0][1],result3[0][2]],[15407.4860,15407.4723,15407.4586],atol = 1e-2, rtol = 0):
+            if np.allclose([result3[0][0],result3[0][1],result3[0][2]],[15407.4860,15407.4723,15407.4586],atol=1e-2, rtol=0):
                 a.append('result3')
                 b+=1
 
@@ -64,7 +64,7 @@ def run_sample():
                 ra=ra, dec=dec, obsname=obsname, lat=lat, longi=longi, alt=alt, pmra=pmra,
                 pmdec=pmdec, px=px, rv=rv, zmeas=zmeas, epoch=epoch, ephemeris=ephemeris, leap_update=True)
 
-            if np.isclose(a = result4, b = 15407.4765, atol = 1e-2, rtol = 0):
+            if np.isclose(a=result4, b=15407.4765, atol=1e-2, rtol=0):
                 a.append('result4')
                 b+=1
 
@@ -78,13 +78,13 @@ def run_sample():
             # Predictive Mode
             result5 = get_BC_vel(JDUTC=2458000, hip_id=8102, lat=-30.169283, longi=-70.806789, alt=2241.9, ephemeris='de430', zmeas=0.0, predictive=True)
 
-            if np.isclose(a = result5[0], b = -15403.15938, atol = 1e-2, rtol = 0):
+            if np.isclose(a=result5[0], b=-15403.15938, atol=1e-2, rtol=0):
                 a.append('result5')
                 b+=1
 
             result6 = get_BC_vel(JDUTC=2458000, lat=-30.169283, longi=-70.806789, alt=2241.9, zmeas=0.0, SolSystemTarget='Sun')
 
-            if np.isclose(a = result6[0], b = 819.4408, atol = 1e-2, rtol = 0):
+            if np.isclose(a=result6[0], b=819.4408, atol=1e-2, rtol=0):
                 a.append('result6')
                 b+=1
 

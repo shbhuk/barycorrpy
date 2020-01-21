@@ -149,18 +149,6 @@ def get_BC_vel(JDUTC,
     (array([15403.95089287]), [[], []], 0)
 
     '''
-
-    print("""
-	 _
-	| |
-	| |__   __ _ _ __ _   _  ___ ___  _ __ _ __ _ __  _   _
-	| '_ \ / _` | '__| | | |/ __/ _ \| '__| '__| '_ \| | | |
-	| |_) | (_| | |  | |_| | (_| (_) | |  | |  | |_) | |_| |
-	|_.__/ \__,_|_|   \__, |\___\___/|_|  |_|  | .__/ \__, |
-	                   __/ |                   | |     __/ |
-	                  |___/                    |_|    |___/
-    """)
-
     warning = []
     error = []
     status = 0
@@ -485,16 +473,13 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
         print('Error: Size of JDUTC array is not equal to expmeterflux (Flux) array')
         error += ['Error: Size of JDUTC array is not equal to expmeterflux (Flux) array']
 
-    ####################
-    ## STELLAR TARGET ##
-    if SolSystemTarget is None:
-        # Running correction for stellar observation
-        ## Calculate barycentric velocity at each instance of exposure meter reading ##
-        vel,warning,status = get_BC_vel(JDUTC=JDUTC,
-                                    starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
-                                    obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                    rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update,
-                                    SolSystemTarget=SolSystemTarget, HorizonsID_type=HorizonsID_type, predictive=predictive)
+
+    ## Calculate barycentric velocity at each instance of exposure meter reading ##
+    vel,warning,status = get_BC_vel(JDUTC=JDUTC,
+                                starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
+                                obsname=obsname,lat=lat,longi=longi,alt=alt,
+                                rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update,
+                                SolSystemTarget=SolSystemTarget, HorizonsID_type=HorizonsID_type, predictive=predictive)
 
 
 
