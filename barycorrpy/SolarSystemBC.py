@@ -50,11 +50,10 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
                     If zmeas is included to show the measured absolute redshift for the Sun as measured by an instrument,
                     then in this formulation, v_true will show the motion of the Sun,
                     which is mostly dominated by the synodic period of Jupiter as seen from Earth.
-                    Our barycentric correction includes the gravitational redshift of the Sun, and therefore the true
-                    velocity (or redshift) is centered at 0 m/s.
+
             Else if predictive = True
                 v_predicted: Ideal redshift measured for the Sun from Earth for given location and time.
-                    This output returns the theoretical prediction for the redshift which includes the barycentric component.
+                    This output returns the theoretical prediction for the measured redshift which includes the barycentric component.
                     This will be the measurement of a noiseless RV instrument observing the Sun.
 
 

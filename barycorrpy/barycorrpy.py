@@ -150,6 +150,17 @@ def get_BC_vel(JDUTC,
 
     '''
 
+    print("""
+	 _
+	| |
+	| |__   __ _ _ __ _   _  ___ ___  _ __ _ __ _ __  _   _
+	| '_ \ / _` | '__| | | |/ __/ _ \| '__| '__| '_ \| | | |
+	| |_) | (_| | |  | |_| | (_| (_) | |  | |  | |_) | |_| |
+	|_.__/ \__,_|_|   \__, |\___\___/|_|  |_|  | .__/ \__, |
+	                   __/ |                   | |     __/ |
+	                  |___/                    |_|    |___/
+    """)
+
     warning = []
     error = []
     status = 0
@@ -219,6 +230,7 @@ def get_BC_vel(JDUTC,
             error.append(a[2])
 
     else:
+        print("This code has not been tested yet, the path ahead is fraught with peril. Proceed with caution!")
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
