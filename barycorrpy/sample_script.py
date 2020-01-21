@@ -82,9 +82,9 @@ def run_sample():
                 a.append('result5')
                 b+=1
 
-            result6 = get_BC_vel(JDUTC=2458000, lat=-30.169283, longi=-70.806789, alt=2241.9, zmeas=0.0, SolSystemTarget='Sun')
+            result6 = get_BC_vel(JDUTC=2458000, lat=-30.169138888, longi=-70.805888, alt=2379.5, zmeas=0.0, SolSystemTarget='Sun')
 
-            if np.isclose(a=result6[0], b=819.4408, atol=1e-2, rtol=0):
+            if np.isclose(a=result6[0], b=819.4474, atol=1e-2, rtol=0):
                 a.append('result6')
                 b+=1
 

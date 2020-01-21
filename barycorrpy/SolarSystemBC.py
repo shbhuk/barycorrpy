@@ -96,6 +96,8 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     GammaSolar = 1. / np.sqrt(1.- np.sum(BetaSolar**2))
 
+
+
     PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
 
     # To correct for redshift experienced by photon due to Earth's gravity well,
@@ -110,10 +112,26 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     zpredicted= ( (GammaSolar * (1 + np.dot(BetaSolar,PosHat_SolEarth))*(1+zGREarth)) /
                 (GammaEarth * (1 + np.dot(BetaEarth,PosHat_SolEarth)) * (1+zGRSun))  ) - 1
 
+    zclassical = (1 + np.dot(BetaSolar,PosHat_SolEarth))/(1 + np.dot(BetaEarth,PosHat_SolEarth))-1
+
     zb = ((GammaEarth*(1 + np.dot(BetaEarth,PosHat_SolEarth))) / (1+zGREarth)) - 1
 
     v_true = c * ((1.+zb)*(1.+ zmeas)-1.)  # [m/s]
     v_predicted = c * zpredicted # [m/s]
+#
+#     print('JDTDB=',JDTDB.jd)
+#     print('PosVector_SolSSB=', PosVector_SolSSB)
+#     print('VelVector_SolSSB=', VelVector_SolSSB)
+#     print('PosVector_EarthSSB=', PosVector_EarthSSB)
+#     print('VelVector_EarthSSB=', VelVector_EarthSSB)
+#     print('rhohat=', PosHat_SolEarth)
+#     print('GammaSolar=',GammaSolar)
+#     print('GammaEarth=',GammaEarth)
+#     print('zGRSun=', zGRSun)
+#     print('zGREarth=', zGREarth)
+#     print('zGR=', ((1+zGREarth)/(1+zGRSun) - 1),'=', ((1+zGREarth)/(1+zGRSun) - 1)*c)
+#     print('zSR=', 1 - GammaEarth/GammaSolar)
+#     print('Classical=',zclassical, '=', zclassical*c)
 
 
     if predictive:
