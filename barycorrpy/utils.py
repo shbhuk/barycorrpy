@@ -7,7 +7,9 @@ except:
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 import os
-
+# import winsound
+# frequency = 2000  # Set Frequency To 2500 Hertz
+# duration = 500 
 
 def flux_weighting(flux,qty):
     '''
@@ -112,3 +114,20 @@ def find_hip(hip_index,cat_dir=os.path.join(*[os.path.dirname(__file__),'data','
     star = {'ra':ra[index],'dec':dec[index],'pmra':pmra[index],'pmdec':pmdec[index],'px':px_mas[index],'epoch':epoch}
     
     return star
+
+      
+def CalculatePositionVector(r1, r2):
+    '''
+    INPUTS:
+        r1, r2 = (x,y,z) positions for Obj 1 and Obj 2.
+    OUTPUTS:    
+        vec(X) = vec(r1) - vec(r2)
+        Xmag, Xhat = Magnitude of the position vector, and its unit vector resp. are also returned.
+    
+    '''
+    # Vector from object barycenter to Observatory
+    X = np.array(r1-r2)
+    Xmag = np.sqrt(np.sum(X*X)) # [m]
+    Xhat = X / Xmag # Unitless
+    
+    return X, Xmag, Xhat
