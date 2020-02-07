@@ -174,7 +174,16 @@ def get_BC_vel(JDUTC,
     else:
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
 
-    ## STELLAR TARGET ##
+    # check if we need to update the leap second file up front using the maximum
+    # of the JDUTC array. Then we turn it off regardless of what the user had set
+    if leap_update:
+        maxutc = max(JDUTC)
+        # Call function to check leap second file and find offset between UTC and TAI.
+        fpath = os.path.join(os.path.dirname(__file__), 'data')
+        tai_utc, warning, error = utc_tdb.leap_manage(utctime=maxutc, fpath=fpath, leap_update=leap_update)
+        leap_update = False
+
+    # STELLAR TARGET #
     if SolSystemTarget is None:
         # Running correction for stellar observation
         star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
@@ -204,10 +213,6 @@ def get_BC_vel(JDUTC,
                      loc=loc,
                      ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,
                      predictive=predictive, **star_output)
-
-            # no need to update the leap file for every JD in the loop
-            # set leap_update to false after it first completes
-            leap_update = False
 
             vel.append(a[0])
             warning.append(a[1])

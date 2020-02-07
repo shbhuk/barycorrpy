@@ -60,7 +60,7 @@ def leap_download(ls_fpath, log_fpath):
 
     if sys.version_info.major == 3:
         try:
-            request = urllib.request.urlopen(url, timeout=5)  # timeout in 5 seconds if no response from server
+            request = urllib.request.urlopen(url, timeout=10)  # timeout in 10 seconds if no response from server
             with open(ls_fpath, 'w') as f:
                 f.write(request.read())
             flag = 0
