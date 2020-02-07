@@ -47,36 +47,37 @@ def staleness_check(file_time,now):
     else: return 0
 
 
-def leap_download(ls_fpath,log_fpath):
-    '''
+def leap_download(ls_fpath, log_fpath):
+    """
     Download the leap second file and update the log file.
     INPUT:
         ls_fpath : Path to where the file will be saved.
         log_fpath : Path to where the log file is created.
 
-    '''
+    """
 
-    url='http://maia.usno.navy.mil/ser7/tai-utc.dat'
+    url = 'http://maia.usno.navy.mil/ser7/tai-utc.dat'
 
-    if sys.version_info.major==3:
+    if sys.version_info.major == 3:
         try:
-            urllib.request.urlretrieve( url,ls_fpath)
-            flag=0
-            with open(log_fpath,'w') as f:
-                f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
-        except (urllib.error.URLError,IOError):
-            flag=1
+            request = urllib.request.urlopen(url, timeout=10)  # timeout in 10 seconds if no response from server
+            with open(ls_fpath, 'w') as f:
+                f.write(request.read())
+            flag = 0
+            with open(log_fpath, 'w') as f:
+                f.write(str(datetime.datetime.utcnow()))  # Write date of download in log file
+        except (urllib.error.URLError, IOError):
+            flag = 1
     else:
         import urllib2
         try:
-            urllib.urlretrieve( url,ls_fpath)
-            flag=0
-            with open(log_fpath,'w') as f:
-                f.write(str(datetime.datetime.utcnow())) # Write date of download in log file
-        except (urllib2.HTTPError,IOError):
-            flag=1
-
-
+            # should this be urllib2.urlretrieve?
+            urllib2.urlretrieve(url, ls_fpath)
+            flag = 0
+            with open(log_fpath, 'w') as f:
+                f.write(str(datetime.datetime.utcnow()))  # Write date of download in log file
+        except (urllib2.HTTPError, IOError):
+            flag = 1
 
     return flag
 

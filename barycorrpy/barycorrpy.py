@@ -174,7 +174,14 @@ def get_BC_vel(JDUTC,
     else:
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
 
-    ## STELLAR TARGET ##
+    # check if we need to update the leap second file up front using the maximum
+    # of the JDUTC array. Then we turn it off regardless of what the user had set
+    if leap_update:
+        maxutc = max(JDUTC)
+        # Call function to check leap second file and find offset between UTC and TAI.
+        tai_utc, warning, error = utc_tdb.leap_manage(utctime=maxutc, fpath=leap_dir, leap_update=leap_update)
+
+    # STELLAR TARGET #
     if SolSystemTarget is None:
         # Running correction for stellar observation
         star_par = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':px,'rv':rv,'epoch':epoch}
@@ -200,9 +207,11 @@ def get_BC_vel(JDUTC,
 
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = BCPy(JDUTC=jdutc,
-                    zmeas=zm,
-                    loc=loc,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive, **star_output)
+                     zmeas=zm,
+                     loc=loc,
+                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False,
+                     predictive=predictive, **star_output)
+
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
@@ -212,7 +221,7 @@ def get_BC_vel(JDUTC,
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = SolarBarycentricCorrection(JDUTC=jdutc, loc=loc, zmeas=zm,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive)
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
@@ -222,7 +231,7 @@ def get_BC_vel(JDUTC,
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive)
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])

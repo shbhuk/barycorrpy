@@ -6,4 +6,4 @@ from .sample_script import *
 from .barycorrpy import get_BC_vel,BCPy,exposure_meter_BC_vel
 from .SolarSystemBC import SolarBarycentricCorrection
 
-__version__ = '0.3'
+__version__ = '0.3.1'
