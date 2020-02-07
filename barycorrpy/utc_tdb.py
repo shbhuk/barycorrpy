@@ -72,7 +72,7 @@ def leap_download(ls_fpath, log_fpath):
         import urllib2
         try:
             # should this be urllib2.urlretrieve?
-            urllib.urlretrieve(url, ls_fpath)
+            urllib2.urlretrieve(url, ls_fpath)
             flag = 0
             with open(log_fpath, 'w') as f:
                 f.write(str(datetime.datetime.utcnow()))  # Write date of download in log file

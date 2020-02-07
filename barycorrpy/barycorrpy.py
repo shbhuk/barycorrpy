@@ -179,8 +179,7 @@ def get_BC_vel(JDUTC,
     if leap_update:
         maxutc = max(JDUTC)
         # Call function to check leap second file and find offset between UTC and TAI.
-        fpath = os.path.join(os.path.dirname(__file__), 'data')
-        tai_utc, warning, error = utc_tdb.leap_manage(utctime=maxutc, fpath=fpath, leap_update=True)
+        tai_utc, warning, error = utc_tdb.leap_manage(utctime=maxutc, fpath=leap_dir, leap_update=leap_update)
 
     # STELLAR TARGET #
     if SolSystemTarget is None:

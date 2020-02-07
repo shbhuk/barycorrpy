@@ -7,3 +7,20 @@
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 *.prof
+
+
+/build/
+build/lib/barycorrpy/__init__.py
+build/lib/barycorrpy/barycorrpy.py
+build/lib/barycorrpy/data/leap_sec.txt
+build/lib/barycorrpy/PINT_erfautils.py
+build/lib/barycorrpy/sample_script.py
+build/lib/barycorrpy/utc_tdb.py
+build/lib/barycorrpy/utils.py
+build/lib/barycorrpy/__init__.py
+build/lib/barycorrpy/barycorrpy.py
+build/lib/barycorrpy/data/leap_sec.txt
+build/lib/barycorrpy/PINT_erfautils.py
+build/lib/barycorrpy/sample_script.py
+build/lib/barycorrpy/utc_tdb.py
+build/lib/barycorrpy/utils.py
