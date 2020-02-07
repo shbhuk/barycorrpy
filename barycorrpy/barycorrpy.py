@@ -200,9 +200,15 @@ def get_BC_vel(JDUTC,
 
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = BCPy(JDUTC=jdutc,
-                    zmeas=zm,
-                    loc=loc,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive, **star_output)
+                     zmeas=zm,
+                     loc=loc,
+                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,
+                     predictive=predictive, **star_output)
+
+            # no need to update the leap file for every JD in the loop
+            # set leap_update to false after it first completes
+            leap_update = False
+
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
