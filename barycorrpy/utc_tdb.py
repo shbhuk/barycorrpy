@@ -47,7 +47,7 @@ def staleness_check(file_time,now):
     else: return 0
 
 
-def leap_download(ls_fpath,log_fpath):
+def leap_download(ls_fpath, log_fpath):
     """
     Download the leap second file and update the log file.
     INPUT:
@@ -60,7 +60,6 @@ def leap_download(ls_fpath,log_fpath):
 
     if sys.version_info.major == 3:
         try:
-            print("Attempting to download leap second file")
             request = urllib.request.urlopen(url, timeout=5)  # timeout in 5 seconds if no response from server
             with open(ls_fpath, 'w') as f:
                 f.write(request.read())
@@ -72,6 +71,7 @@ def leap_download(ls_fpath,log_fpath):
     else:
         import urllib2
         try:
+            # should this be urllib2.urlretrieve?
             urllib.urlretrieve(url, ls_fpath)
             flag = 0
             with open(log_fpath, 'w') as f:
