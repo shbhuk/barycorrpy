@@ -180,8 +180,7 @@ def get_BC_vel(JDUTC,
         maxutc = max(JDUTC)
         # Call function to check leap second file and find offset between UTC and TAI.
         fpath = os.path.join(os.path.dirname(__file__), 'data')
-        tai_utc, warning, error = utc_tdb.leap_manage(utctime=maxutc, fpath=fpath, leap_update=leap_update)
-        leap_update = False
+        tai_utc, warning, error = utc_tdb.leap_manage(utctime=maxutc, fpath=fpath, leap_update=True)
 
     # STELLAR TARGET #
     if SolSystemTarget is None:
@@ -211,7 +210,7 @@ def get_BC_vel(JDUTC,
             a = BCPy(JDUTC=jdutc,
                      zmeas=zm,
                      loc=loc,
-                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,
+                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False,
                      predictive=predictive, **star_output)
 
             vel.append(a[0])
@@ -223,7 +222,7 @@ def get_BC_vel(JDUTC,
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = SolarBarycentricCorrection(JDUTC=jdutc, loc=loc, zmeas=zm,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive)
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
@@ -233,7 +232,7 @@ def get_BC_vel(JDUTC,
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update, predictive=predictive)
+                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
