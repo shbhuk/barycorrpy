@@ -20,7 +20,7 @@ from . import PINT_erfautils as PINT
 from .utils import get_stellar_data,find_hip
 from .PhysicalConstants import *
 
-
+fpath=os.path.join(os.path.dirname(__file__),'data')
 
 def staleness_check(file_time,now):
     '''
@@ -165,7 +165,7 @@ def leap_manage(utctime,fpath,leap_update):
     return tai_utc  , warning , error
 
 
-def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=os.path.join(os.path.dirname(__file__),'data')):
+def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=fpath):
     '''
     Convert JDUTC to JDTDB (Barycentric Dynamical Time)
     INPUT:
