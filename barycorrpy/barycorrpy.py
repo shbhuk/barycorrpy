@@ -78,6 +78,9 @@ def get_BC_vel(JDUTC,
                     5. leap_dir
                     6. leap_update
                     7. predictive
+        HorizonsID_type : Refers to the Horizons id type to identify the object type, and is required for the reflected light observations.
+        > 'smallbody' refers to asteroid or comet and is the default.
+        > 'majorbody' refers to planets or satellites.
 
         predictive : If True, then instead of returning v_true, returns v_predicted.
                      Default: False, and return is v_true from Wright and Eastman (2014)

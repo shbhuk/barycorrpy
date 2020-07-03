@@ -167,7 +167,11 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
                 If False, then will just give a warning message. Default is True.
 
         predictive : If True, then instead of returning v_true, returns v_predicted.
-        Default: False, and return is v_true from Wright and Eastman (2014)
+            Default: False, and return is v_true from Wright and Eastman (2014)
+
+        HorizonsID_type : Refers to the Horizons id type to identify the object type, and is required for the reflected light observations.
+        > 'smallbody' refers to asteroid or comet and is the default.
+        > 'majorbody' refers to planets or satellites.
 
         See OUTPUTs for description
 
@@ -205,6 +209,8 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     except ValueError:
         warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
         TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB, id_type=HorizonsID_type).vectors()
+
+    # Here we ignore the light travel time from Geocenter to Earth's surface (observatory)
     EarthTargetLightTravel = TargetObj1['lighttime'][0] #days
 
     # Subtract light time and find pos and vel for target wrt SSB
@@ -227,7 +233,7 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
 
     # Ignoring difference in light travel time between the Sun and SSB for finding the Solar vectors
     # Subtract light time and find pos and vel for Sun wrt SSB
-    TargetSolLightTravelDelay = EarthTargetLightTravel + TargetSSBLightTravel
+    TargetSolLightTravelDelay = EarthTargetLightTravel + TargetSSBLightTravel # The
     SolObj2 = Horizons(id='Sun', location='@0', epochs=JDTDB-(TargetSolLightTravelDelay), id_type='majorbody')
     SolVectors = SolObj2.vectors(refplane='earth')
 
