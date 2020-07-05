@@ -162,7 +162,7 @@ def get_BC_vel(JDUTC,
 
     # Check for JDUTC type
     if type(JDUTC)!=Time:
-         warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
+         warning += [['Warning: Assuming input time is in UTC JD. Pass astropy Time object to avoid this warning.']]
          JDUTC = Time(JDUTC, format='jd', scale='utc')
 
     if JDUTC.isscalar:
@@ -236,7 +236,8 @@ def get_BC_vel(JDUTC,
             error.append(a[2])
 
     else:
-        print("This code has not been tested yet, the path ahead is fraught with peril. Proceed with caution!")
+        print("Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)")
+        warning+=["Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)"]
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
             a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
