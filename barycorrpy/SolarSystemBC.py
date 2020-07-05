@@ -201,25 +201,25 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
 
 
     # Need dictionary object for HORIZONS call
-    longi = loc.lon.degree
-    lat = loc.lat.degree
-    alt = loc.height.value
-    loc_dict = {'lon': longi,
-                'lat': lat,
-                'elevation': alt}
+    # longi = loc.lon.degree
+    # lat = loc.lat.degree
+    # alt = loc.height.value
+    # loc_dict = {'lon': longi,
+    #             'lat': lat,
+    #             'elevation': alt}
 
     # Reflecting object
     # First find the light travel time for Object with respect to observatory.
 
+    # try:
+    #     TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).vectors()
+    # except ValueError:
+    #     warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
     try:
-        TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).vectors()
-    except ValueError:
-        warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
-        try:
-            TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB, id_type=HorizonsID_type).vectors()
-        except Exception as e:
-            print(e)
-            raise Exception("Error with Horizons call, id={}, location='399' (Geocenter), epochs={}, id_type={}".format(SolSystemTarget, JDTDB, HorizonsID_type))
+        TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB, id_type=HorizonsID_type).vectors()
+    except Exception as e:
+        print(e)
+        raise Exception("Error with Horizons call, id={}, location='399' (Geocenter), epochs={}, id_type={}".format(SolSystemTarget, JDTDB, HorizonsID_type))
 
     # Here we ignore the light travel time from Geocenter to Earth's surface (observatory)
     EarthTargetLightTravel = TargetObj1['lighttime'][0] #days
