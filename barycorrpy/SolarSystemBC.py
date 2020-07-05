@@ -169,9 +169,16 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
         predictive : If True, then instead of returning v_true, returns v_predicted.
             Default: False, and return is v_true from Wright and Eastman (2014)
 
+        SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
+                To correct for Solar RV observations set Target = 'Sun', for reflected light observations, see below.
+
+                For Reflected light observations:
+                    For observations of the Moon: SolSystemTarget='301' and HorizonsID_type='majorbody'
+                    For observations of asteroids: SolSystemTarget=ObjectName, where the ObjectName is queriable by Horizons and HorizonsID_type='smallbody' [default]
+
         HorizonsID_type : Refers to the Horizons id type to identify the object type, and is required for the reflected light observations.
-        > 'smallbody' refers to asteroid or comet and is the default.
-        > 'majorbody' refers to planets or satellites.
+        > 'smallbody' refers to asteroid or comet and is the default. Use for Asteroids.
+        > 'majorbody' refers to planets or satellites. Use for Moon.
 
         See OUTPUTs for description
 
