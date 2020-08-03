@@ -65,7 +65,7 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     # Convert times to obtain TDB and TT
 
-    JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC)
+    JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
 
     ##### NUTATION, PRECESSION, ETC. #####
 
@@ -197,7 +197,7 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
 
 
     # Convert times to obtain TDB and TT
-    JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC)
+    JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
 
 
     # Need dictionary object for HORIZONS call
