@@ -168,7 +168,7 @@ def get_BC_vel(JDUTC,
     if JDUTC.isscalar:
         JDUTC = Time([JDUTC])
     else:
-       if np.size(zmeas)>1 and np.size(zmeas)!=np.size(JDUTC):
+       if np.size(zmeas)>1 and np.size(zmeas)!=len(JDUTC.flatten()):
           error+= [['Error: Size mismatch. JDUTC is a vector, zmeas must also be a vector of same length corresponding to those dates']]
           raise IndexError('Error: Size mismatch. JDUTC is a vector, zmeas must be a vector of same length corresponding to those dates')
 
@@ -214,7 +214,7 @@ def get_BC_vel(JDUTC,
         warning+=['Following are the stellar positional parameters being used - ',star_output]
         vel = []
 
-        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
+        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,len(JDUTC.flatten())/np.size(zmeas))):
             a = BCPy(JDUTC=jdutc,
                      zmeas=zm,
                      loc=loc,
@@ -228,7 +228,7 @@ def get_BC_vel(JDUTC,
     ## SOLAR OBSERVATIONS ##
     elif SolSystemTarget == 'Sun' or SolSystemTarget == 'Sol':
         vel = []
-        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
+        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,len(JDUTC.flatten())/np.size(zmeas))):
             a = SolarBarycentricCorrection(JDUTC=jdutc, loc=loc, zmeas=zm,
                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
             vel.append(a[0])
@@ -239,7 +239,7 @@ def get_BC_vel(JDUTC,
         print("Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)")
         warning+=["Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)"]
         vel = []
-        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,np.size(JDUTC)/np.size(zmeas))):
+        for jdutc,zm in zip(JDUTC,np.repeat(zmeas,len(JDUTC.flatten())/np.size(zmeas))):
             a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
             vel.append(a[0])
