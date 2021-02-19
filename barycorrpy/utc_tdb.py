@@ -388,20 +388,7 @@ def _JDUTC_to_BJDTDB(JDUTC,
     r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
                       math.sin(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
                                               math.sin(dec*np.pi/180.)])
-    # Eq 14 to 17
-    up = [0., 0., 1.]
-    east = np.cross(up, r0hat)
-    east = east / math.sqrt(sum(east*east))
-    north = np.cross(r0hat, east)
-    mu = (pmra*east+pmdec*north)/pctoau/1000 # Divided by 1000 since the Proper motion is in milli-arcseconds.
-
-
-    ##### Convert Star RA DEC to R0hat vector #####
-
-    r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
-                      math.sin(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
-                                              math.sin(dec*np.pi/180.)])
-    # Eq 14 to 17
+    # Eq 14 to 17 from Wright and Eastman 2014
     up = [0., 0., 1.]
     east = np.cross(up, r0hat)
     east = east / math.sqrt(sum(east*east))
@@ -422,7 +409,6 @@ def _JDUTC_to_BJDTDB(JDUTC,
 
     # Geometric Correction
     geo_corr = np.sum(r_obs*rhat)/c
-
 
     delta_t = geo_corr + clock_corr + einstein_corr
     result = JDUTC.jd+delta_t/86400.
