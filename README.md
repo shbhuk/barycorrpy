@@ -18,6 +18,8 @@ To do this, it takes into consideration the following effects-
 
 The installation instructions and the guide on how to run and use the code are explained in the [wiki](https://github.com/shbhuk/barycorrpy/wiki
 
+There is also a video tutorial (courtesy of the [Exoplanet Modeling and Analysis Center](https://emac.gsfc.nasa.gov/) ) available [here](https://www.youtube.com/watch?v=5SqmL6TdJjs), describing how to get started with barycorrpy.
+
 It is important to note that the code does not just output a barycentric velocity which must be subtracted from the raw Radial Velocity. It outputs the net radial velocity after correcting for barycentric correction. This is because the correction involves a cross term due to the relativistic addition. Therefore include the zmeas in the input parameters.
 
 
