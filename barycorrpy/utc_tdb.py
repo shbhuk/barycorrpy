@@ -17,7 +17,7 @@ else:
     from functools32 import lru_cache
 
 from . import PINT_erfautils as PINT
-from .utils import get_stellar_data,find_hip
+from .utils import get_stellar_data,find_hip,CalculatePositionVector
 from .PhysicalConstants import *
 
 fpath=os.path.join(os.path.dirname(__file__),'data')
@@ -382,7 +382,6 @@ def _JDUTC_to_BJDTDB(JDUTC,
     # (TDB accounts for Einstein delay to geocenter)
     einstein_corr = np.sum(r_eci*v_geo)/(c*c)
 
-
     ##### Convert Star RA DEC to R0hat vector #####
 
     r0hat = np.array([math.cos(ra*np.pi/180.)*math.cos(dec*np.pi/180.),
@@ -414,6 +413,157 @@ def _JDUTC_to_BJDTDB(JDUTC,
     result = JDUTC.jd+delta_t/86400.
 
     return result, warning, error
+
+
+def JDUTC_to_SolarEmissionTDB(JDUTC,
+       obsname='', lat=0., longi=0., alt=0.,
+       ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
+
+    '''
+    Based on Eastman et al. 2010, but converts JDUTC to JDTDB, and then moves the 
+    clock to the time of emission from the heliocenter.
+    This is to serve as a time stamp for the solar RVs as observed by PRV spectrographs. 
+    It includes the JDUTC to JDTDB time conversion,  as well as the light travel time from observatory 
+    to solar center and the Einstein delay.
+    
+    Precision has not been explicity tested.
+
+    Calling procedure for JDUTC_to_SolarEmissionTDB. Accepts vector time object (i.e., multiple observation JD values).
+
+    INPUT:
+        JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times.
+                In UTC Scale. If using float, be careful about format and scale used.
+        starname : Name of target. Will query SIMBAD database.
+                                OR / AND
+        hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
+                If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
+                                OR / AND
+
+        obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
+                  If obsname is not used, then can enter lat,long,alt.
+                                OR
+        lat : Latitude of observatory in [degrees]. North (+ve) and South (-ve).
+        longi : Longitude of observatory [degrees]. East (+ve) and West (-ve).
+        alt : Altitude of observatory [m].
+
+        ephemeris : Name of Ephemeris to be used. List of Ephemeris as queried by jplephem. Default is DE430.
+                    For first use Astropy will download the Ephemeris ( for DE430 ~100MB). Options for ephemeris inputs are
+                    ['de432s','de430',
+                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
+                    'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
+        leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
+                      If False, then will just give a warning message. Default is True.
+
+    OUTPUT:
+        corr_time : BJDTDB time
+        warning : Warning and Error message from the routine.
+        status : Status regarding warning and error message. Returns the following -
+                0 - No warning or error.
+                1 - Warning message.
+                2 - Error message.
+
+    Example:
+    >>> from astropy.time import Time
+    >>> JDUTC = Time(2458000, format='jd', scale='utc')
+    >>> utc_tdb.JDUTC_to_SolarEmissionTDB(JDUTC,lat=-30.169283, longi=-70.806789, alt=2241.9)
+    (array([ 2458000.00662602]), [[], []], 0)
+
+    '''
+
+    corr_time = []
+    warning = []
+    error = []
+    status = 0
+
+    # Check for JDUTC type
+    if type(JDUTC)!=Time:
+         warning += [['Warning: Float JDUTC entered. Verify time scale (UTC) and format (JD)']]
+         JDUTC=Time(JDUTC, format='jd', scale='utc')
+
+    if JDUTC.isscalar:
+        JDUTC = Time([JDUTC])
+
+    if obsname:
+        loc = EarthLocation.of_site(obsname)
+        lat = loc.lat.value
+        longi = loc.lon.value
+        alt = loc.height.value
+        warning += [['Warning: Taking observatory coordinates from Astropy Observatory database. Verify precision. Latitude = %f  Longitude = %f  Altitude = %f'%(lat,longi,alt)]]
+    else:
+        loc = EarthLocation.from_geodetic(longi, lat, height=alt)
+
+    for jdutc in JDUTC:
+        a = _JDUTC_to_SolarEmissionTDB(JDUTC=jdutc,
+                 loc=loc,
+                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
+        corr_time.append(a[0])
+        warning.append(a[1])
+        error.append(a[2])
+
+
+    # Status messages to check for warning or error
+    if not all(corr_time): error += ['Check inputs. Error in code']
+    if any(error):   status |= 2
+    if any(warning): status |= 1
+    # Convert corrected from list to numpy array
+    corr_time = np.array(corr_time)
+
+    return corr_time, warning+error, status
+
+
+
+def _JDUTC_to_SolarEmissionTDB(JDUTC, loc,
+    ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
+
+    '''
+    Time conversion between JDUTC to BJDTDB. See Eastman et al. (2010)
+    This code is precise to about 200 us.
+
+    See JDUTC_to_BJDTDB() for parameter description.
+
+    '''
+
+    # Convert times to obtain TDB and TT
+    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
+    clock_corr = (JDTDB.jd - JDUTC.jd) * 86400.
+
+    ##### NUTATION, PRECESSION, ETC. #####
+
+    r_pint, v_pint = PINT.gcrs_posvel_from_itrf(loc, JDUTC, JDTT)
+
+    r_eci = r_pint[0]  # [m]
+    v_eci = v_pint[0]  # [m/s]
+
+    ##### EPHEMERIDES #####
+
+    earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
+    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
+    v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
+
+    # Relativistic Addition of Velocities
+    VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
+
+    ## Ignoring retarded time for Solar vectors
+
+    solar_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
+
+    PosVector_SolSSB = solar_ephem[0].xyz.value*1000. #[m]
+    VelVector_SolSSB = solar_ephem[1].xyz.value*1000./86400.  # [m/s]
+
+    PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
+
+    geo_corr_SSB = PosMag_SolEarth/c 
+    
+    # calculate the Einstein delay relative to the geocenter
+    # (TDB accounts for Einstein delay to geocenter)
+    einstein_corr = np.sum(r_eci*v_geo)/(c*c)
+
+    delta_t = geo_corr_SSB + clock_corr + einstein_corr
+    result = JDUTC.jd+delta_t/86400.
+
+    return result, warning, error
+
 
 @lru_cache(maxsize=200)
 def _read_log(log_fpath):
