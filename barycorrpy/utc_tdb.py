@@ -229,7 +229,7 @@ def JDUTC_to_BJDTDB(JDUTC,
 
     '''
     Time conversion between JDUTC to BJDTDB. See Eastman et al. (2010)
-    This code is precise to about 200 us.
+    This code is precise to about 10 ms.
 
     Calling procedure for JDUTC_to_BJDTDB. Accepts vector time object (i.e., multiple observation JD values).
 
@@ -352,7 +352,7 @@ def _JDUTC_to_BJDTDB(JDUTC,
 
     '''
     Time conversion between JDUTC to BJDTDB. See Eastman et al. (2010)
-    This code is precise to about 200 us.
+    This code is precise to about 10 ms
 
     See JDUTC_to_BJDTDB() for parameter description.
 
@@ -422,7 +422,7 @@ def JDUTC_to_SolarEmissionTDB(JDUTC,
     '''
     Based on Eastman et al. 2010, but converts JDUTC to JDTDB, and then moves the 
     clock to the time of emission from the heliocenter.
-    This is to serve as a time stamp for the solar RVs as observed by PRV spectrographs. 
+    This is to serve as a time stamp for the solar RVs as observed by PRV spectrographs (Wright and Kanodia 2020).
     It includes the JDUTC to JDTDB time conversion,  as well as the light travel time from observatory 
     to solar center and the Einstein delay.
     
@@ -519,7 +519,7 @@ def _JDUTC_to_SolarEmissionTDB(JDUTC, loc,
     '''
     Based on Eastman et al. 2010, but converts JDUTC to JDTDB, and then moves the 
     clock to the time of emission from the heliocenter.
-    This is to serve as a time stamp for the solar RVs as observed by PRV spectrographs. 
+    This is to serve as a time stamp for the solar RVs as observed by PRV spectrographs (Wright and Kanodia 2020).
     It includes the JDUTC to JDTDB time conversion,  as well as the light travel time from observatory 
     to solar center and the Einstein delay.
     
