@@ -559,7 +559,7 @@ def _JDUTC_to_SolarEmissionTDB(JDUTC, loc,
 
     PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
 
-    geo_corr_SSB = PosMag_SolEarth/c 
+    geo_corr_SSB =  - PosMag_SolEarth/c 
     
     # calculate the Einstein delay relative to the geocenter
     # (TDB accounts for Einstein delay to geocenter)

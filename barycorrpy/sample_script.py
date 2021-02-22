@@ -90,7 +90,7 @@ def run_sample():
 
             result7 = utc_tdb.JDUTC_to_SolarEmissionTDB(JDUTC=2458000, obsname='KPNO')
 
-            if np.isclose(a=result7[0], b=2458000.00662602, atol=1e-7, rtol=0):
+            if np.isclose(a=result7[0], b=2457999.99497543, atol=1e-7, rtol=0):
                 a.append('result7')
                 b+=1
 
