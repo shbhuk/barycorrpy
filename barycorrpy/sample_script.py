@@ -88,10 +88,15 @@ def run_sample():
                 a.append('result6')
                 b+=1
 
+            result7 = utc_tdb.JDUTC_to_SolarEmissionTDB(JDUTC=2458000, obsname='KPNO')
 
-            if b==7:
-                print('***********SUCCESS**************\nAll barycentric correction velocities match expected values to 1 cm/s\n')
+            if np.isclose(a=result7[0], b=2457999.99497543, atol=1e-7, rtol=0):
+                a.append('result7')
+                b+=1
+
+            if b==8:
+                print('***********SUCCESS**************\nAll barycentric correction velocities,  and time stamp conversions match expected values.\n')
             else:
-                print('{} out of 7 results match. Compare outputs vs those on the github wiki. Check others - \n'.format(b,a))
+                print('{} out of 8 results match. Compare outputs vs those on the github wiki. Check others - \n'.format(b,a))
 
-            return result, result2, result3, result4, JDUTCMID, warning4, status4, corr_time, result5, result6
+            return result, result2, result3, result4, JDUTCMID, warning4, status4, corr_time, result5, result6, result7
