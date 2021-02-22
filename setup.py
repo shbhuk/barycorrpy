@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='barycorrpy',
-      version='0.3.5',
+      version='0.3.6',
       description='Barycentric Velocity correction at 1 cm/s level',
       long_description=readme(),
       url='https://github.com/shbhuk/barycorrpy',
