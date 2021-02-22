@@ -517,8 +517,14 @@ def _JDUTC_to_SolarEmissionTDB(JDUTC, loc,
     ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
 
     '''
-    Time conversion between JDUTC to BJDTDB. See Eastman et al. (2010)
-    This code is precise to about 200 us.
+    Based on Eastman et al. 2010, but converts JDUTC to JDTDB, and then moves the 
+    clock to the time of emission from the heliocenter.
+    This is to serve as a time stamp for the solar RVs as observed by PRV spectrographs. 
+    It includes the JDUTC to JDTDB time conversion,  as well as the light travel time from observatory 
+    to solar center and the Einstein delay.
+    
+    Precision has not been explicity tested.
+
 
     See JDUTC_to_BJDTDB() for parameter description.
 
