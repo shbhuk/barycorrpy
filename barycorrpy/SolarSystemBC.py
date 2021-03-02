@@ -77,8 +77,10 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     ##### EPHEMERIDES #####
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
-    v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
+    r_geo = np.reshape(earth_geo[0].xyz.value*1000., 3) # [m]
+    v_geo = np.reshape(earth_geo[1].xyz.value*1000./86400., 3)  # [m/s]
+
+    PosVector_EarthSSB = r_eci + r_geo # [m]
 
     # Relativistic Addition of Velocities
     VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
@@ -90,8 +92,8 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     solar_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
 
-    PosVector_SolSSB = solar_ephem[0].xyz.value*1000. #[m]
-    VelVector_SolSSB = solar_ephem[1].xyz.value*1000./86400.  # [m/s]
+    PosVector_SolSSB = np.reshape(solar_ephem[0].xyz.value*1000., 3) #[m]
+    VelVector_SolSSB = np.reshape(solar_ephem[1].xyz.value*1000./86400., 3)  # [m/s]
     BetaSolar = VelVector_SolSSB / c
 
     GammaSolar = 1. / np.sqrt(1.- np.sum(BetaSolar**2))
@@ -263,12 +265,16 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     v_eci = v_pint[0]  # [m/s]
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
-    v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
-    VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
+    r_geo = np.reshape(earth_geo[0].xyz.value*1000., 3) # [m]
+    v_geo = np.reshape(earth_geo[1].xyz.value*1000./86400., 3)  # [m/s]
 
+    PosVector_EarthSSB = r_eci + r_geo # [m]
+
+    # Relativistic Addition of Velocities
+    VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
     BetaEarth = VelVector_EarthSSB / c
-    GammaEarth = 1. / np.sqrt(1. - np.sum(BetaEarth**2))
+
+    GammaEarth = 1. / np.sqrt(1.- np.sum(BetaEarth**2))
 
 
     PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
