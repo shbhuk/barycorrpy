@@ -415,7 +415,7 @@ def _JDUTC_to_BJDTDB(JDUTC,
     return result, warning, error
 
 
-def JDUTC_to_SolarEmissionTDB(JDUTC,
+def JDUTC_to_HJDTDB(JDUTC,
        obsname='', lat=0., longi=0., alt=0.,
        ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
 
@@ -428,16 +428,12 @@ def JDUTC_to_SolarEmissionTDB(JDUTC,
     
     Precision has not been explicity tested.
 
-    Calling procedure for JDUTC_to_SolarEmissionTDB. Accepts vector time object (i.e., multiple observation JD values).
+    Calling procedure for JDUTC_to_HJDTDB. Accepts vector time object (i.e., multiple observation JD values).
 
     INPUT:
         JDUTC : Can enter multiple times in Astropy Time object or as float. Will loop through and find barycentric velocity correction corresponding to those times.
                 In UTC Scale. If using float, be careful about format and scale used.
-        starname : Name of target. Will query SIMBAD database.
-                                OR / AND
-        hip_id : Hipparcos Catalog ID. (Integer) . Epoch will be taken to be Catalogue Epoch or J1991.25
-                If specified then ra,dec,pmra,pmdec,px, and epoch need not be specified.
-                                OR / AND
+
 
         obsname : Name of Observatory as defined in Astropy EarthLocation routine. Can check list by EarthLocation.get_site_names().
                   If obsname is not used, then can enter lat,long,alt.
@@ -466,7 +462,7 @@ def JDUTC_to_SolarEmissionTDB(JDUTC,
     Example:
     >>> from astropy.time import Time
     >>> JDUTC = Time(2458000, format='jd', scale='utc')
-    >>> utc_tdb.JDUTC_to_SolarEmissionTDB(JDUTC,lat=-30.169283, longi=-70.806789, alt=2241.9)
+    >>> utc_tdb.JDUTC_to_HJDTDB(JDUTC,lat=-30.169283, longi=-70.806789, alt=2241.9)
     (array([ 2458000.00662602]), [[], []], 0)
 
     '''
@@ -494,7 +490,7 @@ def JDUTC_to_SolarEmissionTDB(JDUTC,
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
 
     for jdutc in JDUTC:
-        a = _JDUTC_to_SolarEmissionTDB(JDUTC=jdutc,
+        a = _JDUTC_to_HJDTDB(JDUTC=jdutc,
                  loc=loc,
                  ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update)
         corr_time.append(a[0])
@@ -513,7 +509,7 @@ def JDUTC_to_SolarEmissionTDB(JDUTC,
 
 
 
-def _JDUTC_to_SolarEmissionTDB(JDUTC, loc,
+def _JDUTC_to_HJDTDB(JDUTC, loc,
     ephemeris='de430', leap_dir=os.path.join(os.path.dirname(__file__),'data'), leap_update=True):
 
     '''
@@ -526,7 +522,7 @@ def _JDUTC_to_SolarEmissionTDB(JDUTC, loc,
     Precision has not been explicity tested.
 
 
-    See JDUTC_to_BJDTDB() for parameter description.
+    See JDUTC_to_HJDTDB() for parameter description.
 
     '''
 
