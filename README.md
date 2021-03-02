@@ -1,4 +1,4 @@
-# barycorrpy (v0.3.6)
+# barycorrpy (v0.3.7)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115856.svg)](https://doi.org/10.5281/zenodo.1115856)
 

@@ -283,8 +283,10 @@ def BCPy(JDUTC,
     ##### EPHEMERIDES #####
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
-    v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
+    r_geo = np.reshape(earth_geo[0].xyz.value*1000., 3) # [m]
+    v_geo = np.reshape(earth_geo[1].xyz.value*1000./86400., 3)  # [m/s]
+
+    PosVector_EarthSSB = r_eci + r_geo # [m]
 
     # Relativistic Addition of Velocities
     VelVector_EarthSSB = (v_eci+v_geo) / (1.+np.sum(v_eci*v_geo)/c**2) # [m/s]
@@ -339,7 +341,7 @@ def BCPy(JDUTC,
             PosVector_SSObject = earth_geo[0].xyz.value*1000. # [m]
         else:
             jplephem = get_body_barycentric(ss_body, JDTDB, ephemeris=ephemeris)
-            PosVector_SSObject = jplephem.xyz.value*1000. # [m]
+            PosVector_SSObject = np.reshape(jplephem.xyz.value*1000., 3) # [m]
 
         # Vector from object barycenter to Observatory
         PosVector_EarthSSObject, PosMag_EarthSSObject, PosHat_EarthSSObject = CalculatePositionVector(r1=PosVector_EarthSSB, r2=PosVector_SSObject)
