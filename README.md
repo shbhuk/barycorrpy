@@ -1,6 +1,6 @@
 # barycorrpy (v0.4.0)
 
-### Please join the google group for updates regarding bug reports, new versions:
+### Please join the google group for updates regarding bug reports, new versions etc:
 To sign up for updates, please join the Google Group linked here -
 https://groups.google.com/g/barycorrpy
 
