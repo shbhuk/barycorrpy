@@ -1,4 +1,9 @@
-# barycorrpy (v0.3.7)
+# barycorrpy (v0.4.0)
+
+### PLEASE JOIN THE GOOGLE GROUP FOR UPDATES REGARDING BUG REPORTS AND NEW VERSION
+To sign up for updates, please join the Google Group linked here -
+https://groups.google.com/forum/#!forum/barycorrpy
+
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115856.svg)](https://doi.org/10.5281/zenodo.1115856)
 
