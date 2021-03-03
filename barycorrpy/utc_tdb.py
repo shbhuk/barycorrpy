@@ -182,7 +182,7 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=fpath):
         utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
         fpath : Path to where the file would be saved. Default is script directory.
         leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.
-                      If False, then will just give a warning message.  Default is True.
+                      If False, then will just give a warning message.  Default is True. [DEPRECATED >= v0.4.0]
 
     OUTPUT:
         JDTDB : Julian Date Barycentric Dynamic Time (Astropy Time object)
@@ -246,9 +246,9 @@ def JDUTC_to_BJDTDB(JDUTC,
                     ['de432s','de430',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
-        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory. [DEPRECATED >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True.
+                      If False, then will just give a warning message. Default is True. [DEPRECATED >= v0.4.0]
 
     OUTPUT:
         corr_time : BJDTDB time
@@ -314,7 +314,7 @@ def JDUTC_to_BJDTDB(JDUTC,
     for jdutc in JDUTC:
         a = _JDUTC_to_BJDTDB(JDUTC=jdutc,
                  loc=loc,
-                 ephemeris=ephemeris, leap_dir=leap_dir, leap_update=leap_update,**star_output)
+                 ephemeris=ephemeris, **star_output)
         corr_time.append(a[0])
         warning.append(a[1])
         error.append(a[2])
@@ -345,7 +345,7 @@ def _JDUTC_to_BJDTDB(JDUTC,
     '''
 
     # Convert times to obtain TDB and TT
-    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
+    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC)
     clock_corr = (JDTDB.jd - JDUTC.jd) * 86400.
 
     ##### NUTATION, PRECESSION, ETC. #####
@@ -434,8 +434,9 @@ def JDUTC_to_HJDTDB(JDUTC,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
+        [DEPRECATED >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True.
+                      If False, then will just give a warning message. Default is True. [DEPRECATED >= v0.4.0]
 
     OUTPUT:
         corr_time : BJDTDB time
@@ -513,7 +514,7 @@ def _JDUTC_to_HJDTDB(JDUTC, loc,
     '''
 
     # Convert times to obtain TDB and TT
-    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
+    JDTDB, JDTT, warning, error = JDUTC_to_JDTDB(JDUTC)
     clock_corr = (JDTDB.jd - JDUTC.jd) * 86400.
 
     ##### NUTATION, PRECESSION, ETC. #####
