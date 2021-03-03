@@ -182,7 +182,7 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=fpath):
         utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
         fpath : Path to where the file would be saved. Default is script directory.
         leap_update : If True, when the leap second file is more than 6 months old it will attempt to download a new one.
-                      If False, then will just give a warning message.  Default is True. [DEPRECATED >= v0.4.0]
+                      If False, then will just give a warning message.  Default is True. [Not used with versions >= v0.4.0]
 
     OUTPUT:
         JDTDB : Julian Date Barycentric Dynamic Time (Astropy Time object)
@@ -246,9 +246,9 @@ def JDUTC_to_BJDTDB(JDUTC,
                     ['de432s','de430',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
-        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory. [DEPRECATED >= v0.4.0]
+        leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory. [Not used with versions >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True. [DEPRECATED >= v0.4.0]
+                      If False, then will just give a warning message. Default is True. [Not used with versions >= v0.4.0]
 
     OUTPUT:
         corr_time : BJDTDB time
@@ -434,9 +434,9 @@ def JDUTC_to_HJDTDB(JDUTC,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is script directory.
-        [DEPRECATED >= v0.4.0]
+        [Not used with versions >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True. [DEPRECATED >= v0.4.0]
+                      If False, then will just give a warning message. Default is True. [Not used with versions >= v0.4.0]
 
     OUTPUT:
         corr_time : BJDTDB time

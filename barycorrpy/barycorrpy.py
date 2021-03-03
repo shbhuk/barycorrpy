@@ -64,10 +64,10 @@ def get_BC_vel(JDUTC,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
-                script directory. [DEPRECATED >= v0.4.0]
+                script directory. [Not used with versions >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
-                      [DEPRECATED >= v0.4.0]
+                      [Not used with versions >= v0.4.0]
         SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
                 To correct for Solar RV observations set Target = 'Sun', for reflected light observations, see below.
 
@@ -77,8 +77,8 @@ def get_BC_vel(JDUTC,
                     2. loc
                     3. zmeas
                     4. ephemeris
-                    5. leap_dir [DEPRECATED >= v0.4.0]
-                    6. leap_update [DEPRECATED >= v0.4.0]
+                    5. leap_dir [Not used with versions >= v0.4.0]
+                    6. leap_update [Not used with versions >= v0.4.0]
                     7. predictive
 
                 For Reflected light observations:
@@ -410,9 +410,9 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
-            script directory. [DEPRECATED >= v0.4.0]
+            script directory. [Not used with versions >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True. [DEPRECATED >= v0.4.0]
+                      If False, then will just give a warning message. Default is True. [Not used with versions >= v0.4.0]
         SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
                 To correct for Solar RV observations set Target = 'Sun', for reflected light observations, see below.
 
@@ -422,8 +422,8 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                     2. loc
                     3. zmeas
                     4. ephemeris
-                    5. leap_dir [DEPRECATED >= v0.4.0]
-                    6. leap_update [DEPRECATED >= v0.4.0]
+                    5. leap_dir [Not used with versions >= v0.4.0]
+                    6. leap_update [Not used with versions >= v0.4.0]
                     7. predictive
 
                 For Reflected light observations:
