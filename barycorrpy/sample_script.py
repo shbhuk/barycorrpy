@@ -6,6 +6,8 @@ from .barycorrpy import get_BC_vel , exposure_meter_BC_vel
 from . import utc_tdb
 
 def run_sample():
+			print("Please join our Google Group to keep update to latest versions and bug fixes - https://groups.google.com/g/barycorrpy")
+	
             a=[]
             b=0
 
