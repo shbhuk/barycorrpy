@@ -64,9 +64,10 @@ def get_BC_vel(JDUTC,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
-                script directory.
+                script directory. [Not used with versions >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
                       If False, then will just give a warning message. Default is True.
+                      [Not used with versions >= v0.4.0]
         SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
                 To correct for Solar RV observations set Target = 'Sun', for reflected light observations, see below.
 
@@ -76,8 +77,8 @@ def get_BC_vel(JDUTC,
                     2. loc
                     3. zmeas
                     4. ephemeris
-                    5. leap_dir
-                    6. leap_update
+                    5. leap_dir [Not used with versions >= v0.4.0]
+                    6. leap_update [Not used with versions >= v0.4.0]
                     7. predictive
 
                 For Reflected light observations:
@@ -181,15 +182,6 @@ def get_BC_vel(JDUTC,
     else:
         loc = EarthLocation.from_geodetic(longi, lat, height=alt)
 
-    # check if we need to update the leap second file up front using the maximum
-    # of the JDUTC array. Then we turn it off regardless of what the user had set
-    if leap_update:
-        maxutc = max(JDUTC)
-        # Call function to check leap second file and find offset between UTC and TAI.
-        tai_utc, warning1, error1 = utc_tdb.leap_manage(utctime=maxutc, fpath=leap_dir, leap_update=leap_update)
-        warning += warning1
-        error += error1
-
     # STELLAR TARGET #
     if SolSystemTarget is None:
         # Running correction for stellar observation
@@ -218,7 +210,7 @@ def get_BC_vel(JDUTC,
             a = BCPy(JDUTC=jdutc,
                      zmeas=zm,
                      loc=loc,
-                     ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False,
+                     ephemeris=ephemeris, 
                      predictive=predictive, **star_output)
 
             vel.append(a[0])
@@ -230,7 +222,7 @@ def get_BC_vel(JDUTC,
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,len(JDUTC.flatten())/np.size(zmeas))):
             a = SolarBarycentricCorrection(JDUTC=jdutc, loc=loc, zmeas=zm,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
+                    ephemeris=ephemeris, predictive=predictive)
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
@@ -241,7 +233,7 @@ def get_BC_vel(JDUTC,
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,len(JDUTC.flatten())/np.size(zmeas))):
             a = ReflectedLightBarycentricCorrection(SolSystemTarget=SolSystemTarget, JDUTC=jdutc, loc=loc, zmeas=zm, HorizonsID_type=HorizonsID_type,
-                    ephemeris=ephemeris, leap_dir=leap_dir, leap_update=False, predictive=predictive)
+                    ephemeris=ephemeris, predictive=predictive)
             vel.append(a[0])
             warning.append(a[1])
             error.append(a[2])
@@ -271,7 +263,7 @@ def BCPy(JDUTC,
     '''
 
     # Convert times to obtain TDB and TT
-    JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC, fpath=leap_dir, leap_update=leap_update)
+    JDTDB, JDTT, warning, error = utc_tdb.JDUTC_to_JDTDB(JDUTC)
 
     ##### NUTATION, PRECESSION, ETC. #####
 
@@ -418,9 +410,9 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                     'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir : Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
-            script directory.
+            script directory. [Not used with versions >= v0.4.0]
         leap_update : If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                      If False, then will just give a warning message. Default is True.
+                      If False, then will just give a warning message. Default is True. [Not used with versions >= v0.4.0]
         SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
                 To correct for Solar RV observations set Target = 'Sun', for reflected light observations, see below.
 
@@ -430,8 +422,8 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
                     2. loc
                     3. zmeas
                     4. ephemeris
-                    5. leap_dir
-                    6. leap_update
+                    5. leap_dir [Not used with versions >= v0.4.0]
+                    6. leap_update [Not used with versions >= v0.4.0]
                     7. predictive
 
                 For Reflected light observations:
@@ -510,7 +502,7 @@ def exposure_meter_BC_vel(JDUTC, expmeterflux,
     vel,warning,status = get_BC_vel(JDUTC=JDUTC,
                                 starname=starname,hip_id=hip_id,ra=ra,dec=dec,epoch=epoch,pmra=pmra,pmdec=pmdec,px=px,
                                 obsname=obsname,lat=lat,longi=longi,alt=alt,
-                                rv=rv,zmeas=zmeas,ephemeris=ephemeris,leap_dir=leap_dir,leap_update=leap_update,
+                                rv=rv,zmeas=zmeas,ephemeris=ephemeris,
                                 SolSystemTarget=SolSystemTarget, HorizonsID_type=HorizonsID_type, predictive=predictive)
 
 

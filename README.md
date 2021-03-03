@@ -1,4 +1,4 @@
-# barycorrpy (v0.4.0)
+# barycorrpy (v0.4.1)
 
 ### Please join the google group for updates regarding bug reports, new versions etc:
 To sign up for updates, please join the Google Group linked here -
@@ -27,11 +27,6 @@ There is also a video tutorial (courtesy of the [Exoplanet Modeling and Analysis
 It is important to note that the code does not just output a barycentric velocity which must be subtracted from the raw Radial Velocity. It outputs the net radial velocity after correcting for barycentric correction. This is because the correction involves a cross term due to the relativistic addition. Therefore include the zmeas in the input parameters.
 
 
-### Leap Second Management
-
-When converting UTC to TDB ([different time standards explained](http://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)), we need to inlcude for the leap second correction.
-We do not use Astropy for this correction due to the lack of an efficient mechanism to update the files when a new leap second is announced. Leap seconds are hard coded into Astropy's ERFA routines, and thus to update for a new leap second the user would have to update Astropy and re-compile it.
-In this routine `utc_tdb.py`, we incorporate this is a stand alone file which is checked every time the code is run. Details for this can be found in the [wiki](https://github.com/shbhuk/barycorrpy/wiki).
 
 ### JDUTC to BJDTDB converter
 As explained in [Eastman et al. 2010](http://adsabs.harvard.edu/abs/2010PASP..122..935E), we also include a JDUTC to BJDTDB time converter.
