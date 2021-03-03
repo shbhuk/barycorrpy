@@ -84,6 +84,11 @@ def leap_download(ls_fpath, log_fpath):
 
 def leap_manage(utctime,fpath,leap_update):
     '''
+    
+    DEPRECATED:     v0.4.0 onwards 
+    20210303
+    Using Astropy for leap seconds instead of maintaining/updating a separate files.
+    --------------------------------------------------------------------------------------
 
     Calculates the offset between UTC and TAI from the leap second file.
     Also, checks for 'staleness' (how old is the file) of the leap second file.
@@ -167,6 +172,11 @@ def leap_manage(utctime,fpath,leap_update):
 
 def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=fpath):
     '''
+    v0.4.0 onwards 
+    20210303
+    Using Astropy for leap seconds instead of maintaining/updating a separate files.
+    
+    DEPRECATED
     Convert JDUTC to JDTDB (Barycentric Dynamical Time)
     INPUT:
         utctime : Enter UTC time as Astropy Time Object. In UTC Scale.
@@ -183,39 +193,15 @@ def JDUTC_to_JDTDB(utctime,leap_update=True,fpath=fpath):
 
 
     '''
-
-    JDUTC=utctime.jd
-    if JDUTC<2441317.5 :
-        return utctime.tdb,utctime.tt,['WARNING : JD = '+str(utctime.jd)+' :  Precise leap second history is not maintained here for before 1972. Defaulting to Astropy for time conversion. Corrections maybe inaccurate.'],[]
-
-    # Call function to check leap second file and find offset between UTC and TAI.
-    tai_utc,warning,error=leap_manage(utctime=utctime,fpath=fpath,leap_update=leap_update)
-
-    if utctime.scale != 'utc':
-        error+['ERROR : JD = '+str(utctime.jd)+' : Please input time in UTC scale']
-        if utctime.scale == 'tdb':
-            return utctime.tdb,utctime.tt,['WARNING : JD = '+str(utctime.jd)+' :  UTC Time scale not used. Defaulting to Astropy for time conversion. Corrections maybe inaccurate.'],[]
-
-    if tai_utc==0:
-        return utctime.tdb,utctime.tt,warning,error+['ERROR : JD = '+str(utctime.jd)+' :  Unable to maintain leap second file. Defaulting to AstroPy version of leap seconds.']
-
-    check_time=utctime.datetime
-
-
-    # Add leap seconds to convert UTC to TAI
-    new_tai=check_time+datetime.timedelta(seconds=tai_utc)  # Add offset and convert to TAI
-    new_tt=new_tai+datetime.timedelta(seconds=32.184)  # Add 32.184 to convert TAI to TT
-
-    g=(357.53+0.9856003*( JDUTC - 2451545.0 ))*np.pi/180.  # Earth's mean anomaly
-
-    TDB = new_tt+datetime.timedelta(seconds=0.001658*np.sin(g)+0.000014*np.sin(2*g)) # TT to TDB
-
-    JDTT=Time(new_tt,scale='tt',format='datetime')
-    JDTT.format='jd'
-    JDTDB = Time(TDB,scale='tdb',format='datetime')
-    JDTDB.format='jd'
-
-    return JDTDB,JDTT,warning,error
+    warning = []
+    error = []
+    
+    if astropy.__version__ < '4.0.4':
+        error+=["ERROR: Using Astropy version < 4.0.4 might not have the latest leap second file. Please update to a newer Astropy version to ensure updated leap seconds. "]
+    
+    return utctime.tdb,utctime.tt, warning, error
+    
+    
 
 
 
