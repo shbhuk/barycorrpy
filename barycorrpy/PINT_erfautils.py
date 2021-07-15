@@ -4,10 +4,7 @@ from __future__ import division
 import numpy as np
 import astropy.units as u
 import datetime
-try:
-    import astropy.erfa as erfa
-except ImportError:
-    import astropy._erfa as erfa
+import erfa
 import astropy.table as table
 from astropy.time import Time
 from astropy.utils.iers import conf,IERS_A, IERS_A_URL, IERS_B, IERS_B_URL, IERS
