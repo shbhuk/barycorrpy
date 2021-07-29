@@ -218,7 +218,8 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     # except ValueError:
     #     warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
     try:
-        TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB, id_type=HorizonsID_type).vectors()
+        TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB.jd, id_type=HorizonsID_type).vectors()
+        warning += ['Queried {} from Horizons'.format(TargetObj1['targetname'][0])]
     except Exception as e:
         print(e)
         raise Exception("Error with Horizons call, id={}, location='399' (Geocenter), epochs={}, id_type={}".format(SolSystemTarget, JDTDB, HorizonsID_type))
@@ -228,7 +229,7 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
 
     # Subtract light time and find pos and vel for target wrt SSB
     TargetObjTime = JDTDB - (EarthTargetLightTravel)
-    TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime, id_type=HorizonsID_type)
+    TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime.jd, id_type=HorizonsID_type)
     TargetVectors = TargetObj2.vectors(refplane='earth')
     TargetSSBLightTravel = TargetVectors['lighttime'][0] #days
 
