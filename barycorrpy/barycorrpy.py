@@ -228,7 +228,7 @@ def get_BC_vel(JDUTC,
             error.append(a[2])
 
     else:
-        print("Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)")
+        # print("Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)")
         warning+=["Reflected light observations of solar system objects include complexities not accounted for in this calculation, such as rotation, phase effects, and finite source effects.  See Wright & Kanodia (2020)"]
         vel = []
         for jdutc,zm in zip(JDUTC,np.repeat(zmeas,len(JDUTC.flatten())/np.size(zmeas))):
