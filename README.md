@@ -1,10 +1,15 @@
 # barycorrpy (v0.4.4)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115856.svg)](https://doi.org/10.5281/zenodo.1115856)
+[![Build Status](https://travis-ci.com/bjfultn/barycorrpy.svg?branch=master)](https://travis-ci.com/bjfultn/barycorrpy)
+[![Coverage Status](https://coveralls.io/repos/github/bjfultn/barycorrpy/badge.svg?branch=master)](https://coveralls.io/github/bjfultn/barycorrpy?branch=master)
+[![PyPI version](https://badge.fury.io/py/barycorrpy.svg)](https://badge.fury.io/py/barycorrpy)
+[![PyPI downloads](https://img.shields.io/pypi/dm/barycorrpy.svg)](https://pypistats.org/packages/barycorrpy)
+
 ### Please join the google group for updates regarding bug reports, new versions etc:
 To sign up for updates, please join the Google Group linked here -
 https://groups.google.com/g/barycorrpy
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115856.svg)](https://doi.org/10.5281/zenodo.1115856)
 
 [Barycorrpy](http://iopscience.iop.org/article/10.3847/2515-5172/aaa4b7) is the Python version of Jason Eastman and Jason Wright's IDL code [BaryCorr](http://astroutils.astronomy.ohio-state.edu/exofast/pro/exofast/bary/zbarycorr.pro) based on [Wright and Eastman (2014)](https://arxiv.org/pdf/1409.4774.pdf). BCPy can be used to calculate the barycentric velocity correction for a star with an accuracy well below 1 cm/s .
 To do this, it takes into consideration the following effects-
@@ -52,3 +57,4 @@ Guidelines to cite this package can be found [here](https://github.com/AASJourna
 
 To sign up for updates, please join the Google Group linked here -
 https://groups.google.com/forum/#!forum/barycorrpy
+

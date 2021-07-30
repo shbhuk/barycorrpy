@@ -1,0 +1,11 @@
+language: python
+
+services:
+  - docker
+
+install:
+  - docker build --tag bary .
+
+script:
+  - docker run --env TRAVIS_JOB_ID=$TRAVIS_JOB_ID -v ${PWD}:/code/barycorrpy bary make init regression_tests
+  
