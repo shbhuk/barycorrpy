@@ -4,6 +4,7 @@ services:
   - docker
 
 install:
+  - pip install coveralls
   - docker build --tag bary .
 
 script:
