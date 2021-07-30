@@ -5,6 +5,9 @@ FROM python:3.7-slim
 ENV PYTHONPATH=$PYTHONPATH:/code/barycorrpy
 ENV PYTHONHASHSEED=0
 
+# change me to point to your coveralls view of the repo
+ENV COVERALLS_REPO_TOKEN=pU74HZ9rvqc0u7iXr95LbzQ8NTzycWSLx
+
 # turn off built-in Python multithreading
 ENV MKL_NUM_THREADS=1
 ENV NUMEXPR_NUM_THREADS=1
