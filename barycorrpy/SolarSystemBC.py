@@ -35,9 +35,9 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir: Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
-                script directory.
+                script directory. [Not used with versions >= v0.4.0]
         leap_update: If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                If False, then will just give a warning message. Default is True.
+                If False, then will just give a warning message. Default is True. [Not used with versions >= v0.4.0]
 
         predictive : If True, then instead of returning v_true, returns v_predicted.
         Default: False, and return is v_true from Wright and Eastman (2014)
@@ -77,8 +77,10 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
     ##### EPHEMERIDES #####
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
-    v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
+    r_geo = np.reshape(earth_geo[0].xyz.value*1000., 3) # [m]
+    v_geo = np.reshape(earth_geo[1].xyz.value*1000./86400., 3)  # [m/s]
+
+    PosVector_EarthSSB = r_eci + r_geo # [m]
 
     # Relativistic Addition of Velocities
     VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
@@ -90,8 +92,8 @@ def SolarBarycentricCorrection(JDUTC, loc, zmeas=0, ephemeris='de430', leap_dir=
 
     solar_ephem = get_body_barycentric_posvel('sun', JDTDB, ephemeris=ephemeris)
 
-    PosVector_SolSSB = solar_ephem[0].xyz.value*1000. #[m]
-    VelVector_SolSSB = solar_ephem[1].xyz.value*1000./86400.  # [m/s]
+    PosVector_SolSSB = np.reshape(solar_ephem[0].xyz.value*1000., 3) #[m]
+    VelVector_SolSSB = np.reshape(solar_ephem[1].xyz.value*1000./86400., 3)  # [m/s]
     BetaSolar = VelVector_SolSSB / c
 
     GammaSolar = 1. / np.sqrt(1.- np.sum(BetaSolar**2))
@@ -162,12 +164,23 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de423_for_mercury_and_venus/de423.bsp',
                 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de405.bsp']
         leap_dir: Directory where leap seconds file will be saved and maintained (STRING). Eg. '/Users/abc/home/savehere/'. Default is
-                script directory.
+                script directory. [Not used with versions >= v0.4.0]
         leap_update: If True, when the leap second file is more than 6 months old will attempt to download a new one.
-                If False, then will just give a warning message. Default is True.
+                If False, then will just give a warning message. Default is True. [Not used with versions >= v0.4.0]
 
         predictive : If True, then instead of returning v_true, returns v_predicted.
-        Default: False, and return is v_true from Wright and Eastman (2014)
+            Default: False, and return is v_true from Wright and Eastman (2014)
+
+        SolSystemTarget : When running barycentric correction for a stellar target, Target = None. Default value = None
+                To correct for Solar RV observations set Target = 'Sun', for reflected light observations, see below.
+
+                For Reflected light observations:
+                    For observations of the Moon: SolSystemTarget='301' and HorizonsID_type='majorbody'
+                    For observations of asteroids: SolSystemTarget=ObjectName, where the ObjectName is queriable by Horizons and HorizonsID_type='smallbody' [default]
+
+        HorizonsID_type : Refers to the Horizons id type to identify the object type, and is required for the reflected light observations.
+        > 'smallbody' refers to asteroid or comet and is the default. Use for Asteroids.
+        > 'majorbody' refers to planets or satellites. Use for Moon.
 
         See OUTPUTs for description
 
@@ -190,26 +203,33 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
 
 
     # Need dictionary object for HORIZONS call
-    longi = loc.lon.degree
-    lat = loc.lat.degree
-    alt = loc.height.value
-    loc_dict = {'lon': longi,
-                'lat': lat,
-                'elevation': alt}
+    # longi = loc.lon.degree
+    # lat = loc.lat.degree
+    # alt = loc.height.value
+    # loc_dict = {'lon': longi,
+    #             'lat': lat,
+    #             'elevation': alt}
 
     # Reflecting object
     # First find the light travel time for Object with respect to observatory.
 
+    # try:
+    #     TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).vectors()
+    # except ValueError:
+    #     warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
     try:
-        TargetObj1 = Horizons(id=SolSystemTarget, location=loc_dict, epochs=JDTDB, id_type=HorizonsID_type).vectors()
-    except ValueError:
-        warning+= ['Unable to use Vector query for Horizons search using exact observatory coordinates, reverting to using Geocenter. ']
-        TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB, id_type=HorizonsID_type).vectors()
+        TargetObj1 = Horizons(id=SolSystemTarget, location='399', epochs=JDTDB.jd, id_type=HorizonsID_type).vectors()
+        warning += ['Queried {} from Horizons'.format(TargetObj1['targetname'][0])]
+    except Exception as e:
+        print(e)
+        raise Exception("Error with Horizons call, id={}, location='399' (Geocenter), epochs={}, id_type={}".format(SolSystemTarget, JDTDB, HorizonsID_type))
+
+    # Here we ignore the light travel time from Geocenter to Earth's surface (observatory)
     EarthTargetLightTravel = TargetObj1['lighttime'][0] #days
 
     # Subtract light time and find pos and vel for target wrt SSB
     TargetObjTime = JDTDB - (EarthTargetLightTravel)
-    TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime, id_type=HorizonsID_type)
+    TargetObj2 = Horizons(id=SolSystemTarget, location='@0', epochs=TargetObjTime.jd, id_type=HorizonsID_type)
     TargetVectors = TargetObj2.vectors(refplane='earth')
     TargetSSBLightTravel = TargetVectors['lighttime'][0] #days
 
@@ -227,7 +247,7 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
 
     # Ignoring difference in light travel time between the Sun and SSB for finding the Solar vectors
     # Subtract light time and find pos and vel for Sun wrt SSB
-    TargetSolLightTravelDelay = EarthTargetLightTravel + TargetSSBLightTravel
+    TargetSolLightTravelDelay = EarthTargetLightTravel + TargetSSBLightTravel # The
     SolObj2 = Horizons(id='Sun', location='@0', epochs=JDTDB-(TargetSolLightTravelDelay), id_type='majorbody')
     SolVectors = SolObj2.vectors(refplane='earth')
 
@@ -246,12 +266,16 @@ def ReflectedLightBarycentricCorrection(SolSystemTarget, JDUTC, loc, zmeas=0, Ho
     v_eci = v_pint[0]  # [m/s]
 
     earth_geo = get_body_barycentric_posvel('earth', JDTDB, ephemeris=ephemeris) # [km]
-    PosVector_EarthSSB = r_eci + earth_geo[0].xyz.value*1000. # [m]
-    v_geo = earth_geo[1].xyz.value*1000./86400.  # [m/s]
-    VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
+    r_geo = np.reshape(earth_geo[0].xyz.value*1000., 3) # [m]
+    v_geo = np.reshape(earth_geo[1].xyz.value*1000./86400., 3)  # [m/s]
 
+    PosVector_EarthSSB = r_eci + r_geo # [m]
+
+    # Relativistic Addition of Velocities
+    VelVector_EarthSSB = (v_eci+v_geo) / (1.+ np.sum(v_eci*v_geo)/c**2) # [m/s]
     BetaEarth = VelVector_EarthSSB / c
-    GammaEarth = 1. / np.sqrt(1. - np.sum(BetaEarth**2))
+
+    GammaEarth = 1. / np.sqrt(1.- np.sum(BetaEarth**2))
 
 
     PosVector_SolEarth, PosMag_SolEarth, PosHat_SolEarth = CalculatePositionVector(r1=PosVector_SolSSB, r2=PosVector_EarthSSB)
