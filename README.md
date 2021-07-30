@@ -52,3 +52,4 @@ Guidelines to cite this package can be found [here](https://github.com/AASJourna
 
 To sign up for updates, please join the Google Group linked here -
 https://groups.google.com/forum/#!forum/barycorrpy
+
