@@ -1,8 +1,13 @@
 language: python
 
 install:
-  - pip install .
+   - pip install .
+   - pip install coverage
+   - pip install coveralls
+   - pip install pyyaml
 
 script: 
-  - python -m unittest discover
+  - coverage run -m unittest discover
   
+after_success:
+  - coveralls
