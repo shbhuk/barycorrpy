@@ -3,5 +3,6 @@ language: python
 install:
   - pip install .
 
-script: make test
+script: 
+  - python -m unittest discover
   
