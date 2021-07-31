@@ -1,8 +1,9 @@
 # barycorrpy (v0.4.4)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115856.svg)](https://doi.org/10.5281/zenodo.1115856)
-[![Build Status](https://travis-ci.com/bjfultn/barycorrpy.svg?branch=master)](https://travis-ci.com/bjfultn/barycorrpy)
-[![Coverage Status](https://coveralls.io/repos/github/bjfultn/barycorrpy/badge.svg?branch=master)](https://coveralls.io/github/bjfultn/barycorrpy?branch=master)
+[![Build Status](https://travis-ci.com/shbhuk/barycorrpy.svg?branch=Include_CI)](https://travis-ci.com/shbhuk/barycorrpy)
+
+[comment]: # [![Coverage Status](https://coveralls.io/repos/github/bjfultn/barycorrpy/badge.svg?branch=master)](https://coveralls.io/github/bjfultn/barycorrpy?branch=master)
 [![PyPI version](https://badge.fury.io/py/barycorrpy.svg)](https://badge.fury.io/py/barycorrpy)
 [![PyPI downloads](https://img.shields.io/pypi/dm/barycorrpy.svg)](https://pypistats.org/packages/barycorrpy)
 
