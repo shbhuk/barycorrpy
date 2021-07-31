@@ -1,7 +1,7 @@
 language: python
 
 install:
-  - pip install -r
+  - pip install .
 
 script: make test
   
