@@ -1,7 +1,7 @@
 language: python
 
 install:
-#  - pip install .
+   - pip install .
    - pip install coverage
    - pip install coveralls
 
