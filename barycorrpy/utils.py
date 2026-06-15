@@ -34,9 +34,9 @@ def get_stellar_data(name=''):
     warning = []
     
     customSimbad = Simbad()
-    customSimbad.add_votable_fields('ra(2;A;ICRS;J2000)', 'dec(2;D;ICRS;J2000)','pm', 'plx','parallax','rv_value')
+    customSimbad.add_votable_fields('ra', 'dec', 'pmra', 'pmdec', 'plx_value', 'rvz_radvel')
     #Simbad.list_votable_fields()
-    customSimbad.remove_votable_fields( 'coordinates')
+    #customSimbad.remove_votable_fields('coordinates')
     #Simbad.get_field_description('orv')
     obj = customSimbad.query_object(name)
     if obj is None:
@@ -51,13 +51,13 @@ def get_stellar_data(name=''):
 
     obj = obj.filled(None)
     
-    pos = SkyCoord(ra=obj['RA_2_A_ICRS_J2000'],dec=obj['DEC_2_D_ICRS_J2000'],unit=(u.hourangle, u.deg))
+    pos = SkyCoord(ra=obj['ra'], dec=obj['dec'], unit=(u.deg, u.deg))
     ra = pos.ra.value[0]
     dec = pos.dec.value[0]
-    pmra = obj['PMRA'][0]
-    pmdec = obj['PMDEC'][0]
-    plx = obj['PLX_VALUE'][0]
-    rv = obj['RV_VALUE'][0] * 1000 #SIMBAD output is in km/s. Converting to m/s
+    pmra = obj['pmra'][0]
+    pmdec = obj['pmdec'][0]
+    plx = obj['plx_value'][0]
+    rv = obj['rvz_radvel'][0] * 1000 #SIMBAD output is in km/s. Converting to m/s
     epoch = 2451545.0
     
     star = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':plx,'rv':rv,'epoch':epoch}
