@@ -23,25 +23,68 @@ def flux_weighting(flux,qty):
     
     return sum(qty * flux)/sum(flux)
     
+def _astroquery_simbad_is_new():
+    '''
+    True if the installed astroquery uses the post-0.4.8 SIMBAD field schema.
+    '''
+    from astroquery import __version__ as aq_version
+    from packaging.version import parse
+    return parse(aq_version) >= parse('0.4.8')
+
+
+def _query_simbad_object(name):
+    '''
+    Query SIMBAD for `name` across astroquery versions.
+
+    Many pipelines still run on astroquery < 0.4.8, which used a different set
+    of votable field names and coordinate units than current releases. All of
+    that version-specific knowledge is isolated here so that the caller works
+    with a single, uniform set of keys regardless of the installed version.
+
+    Note: the `keys` map the old names to the new SIMBAD names, so this can
+    be deprecated when older versions of astroquery are no longer supported.
+
+    OUTPUT:
+        obj : the astropy Table returned by SIMBAD (or None if not found)
+        keys : dict mapping logical name -> column name in `obj`
+        ra_dec_unit : units to feed SkyCoord for the ra/dec columns
+    '''
+    customSimbad = Simbad()
+
+    if _astroquery_simbad_is_new():
+        # astroquery >= 0.4.8 (new SIMBAD field names)
+        customSimbad.add_votable_fields('ra', 'dec', 'pmra', 'pmdec', 'plx_value', 'rvz_radvel')
+        keys = {'ra': 'ra', 'dec': 'dec', 'pmra': 'pmra', 'pmdec': 'pmdec',
+                'plx': 'plx_value', 'rv': 'rvz_radvel'}
+        ra_dec_unit = (u.deg, u.deg)
+    else:
+        # astroquery < 0.4.8 (legacy SIMBAD field names)
+        customSimbad.add_votable_fields('ra(2;A;ICRS;J2000)', 'dec(2;D;ICRS;J2000)',
+                                        'pm', 'plx', 'parallax', 'rv_value')
+        customSimbad.remove_votable_fields('coordinates')
+        keys = {'ra': 'RA_2_A_ICRS_J2000', 'dec': 'DEC_2_D_ICRS_J2000',
+                'pmra': 'PMRA', 'pmdec': 'PMDEC',
+                'plx': 'PLX_VALUE', 'rv': 'RV_VALUE'}
+        ra_dec_unit = (u.hourangle, u.deg)
+
+    obj = customSimbad.query_object(name)
+    return obj, keys, ra_dec_unit
+
+
 def get_stellar_data(name=''):
     '''
     Function to query Simbad for following stellar information RA, Dec, PMRA, PMDec, Parallax Epoch
     INPUTS:
-        name = Name of source. Example 
-    
-    
+        name = Name of source. Example
+
+
     '''
     warning = []
-    
-    customSimbad = Simbad()
-    customSimbad.add_votable_fields('ra', 'dec', 'pmra', 'pmdec', 'plx_value', 'rvz_radvel')
-    #Simbad.list_votable_fields()
-    #customSimbad.remove_votable_fields('coordinates')
-    #Simbad.get_field_description('orv')
-    obj = customSimbad.query_object(name)
+
+    obj, keys, ra_dec_unit = _query_simbad_object(name)
     if obj is None:
         raise ValueError('ERROR: {} target not found. Check target name or enter RA,Dec,PMRA,PMDec,Plx,RV,Epoch manually\n\n'.format(name))
-    else:        
+    else:
         warning += ['{} queried from SIMBAD.'.format(name)]
 
     # Check for masked values
@@ -50,16 +93,16 @@ def get_stellar_data(name=''):
 
 
     obj = obj.filled(None)
-    
-    pos = SkyCoord(ra=obj['ra'], dec=obj['dec'], unit=(u.deg, u.deg))
+
+    pos = SkyCoord(ra=obj[keys['ra']], dec=obj[keys['dec']], unit=ra_dec_unit)
     ra = pos.ra.value[0]
     dec = pos.dec.value[0]
-    pmra = obj['pmra'][0]
-    pmdec = obj['pmdec'][0]
-    plx = obj['plx_value'][0]
-    rv = obj['rvz_radvel'][0] * 1000 #SIMBAD output is in km/s. Converting to m/s
+    pmra = obj[keys['pmra']][0]
+    pmdec = obj[keys['pmdec']][0]
+    plx = obj[keys['plx']][0]
+    rv = obj[keys['rv']][0] * 1000 #SIMBAD output is in km/s. Converting to m/s
     epoch = 2451545.0
-    
+
     star = {'ra':ra,'dec':dec,'pmra':pmra,'pmdec':pmdec,'px':plx,'rv':rv,'epoch':epoch}
     
     # Fill Masked values with None. Again. 
