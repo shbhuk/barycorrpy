@@ -1,5 +1,6 @@
 import unittest
 from barycorrpy import get_BC_vel , exposure_meter_BC_vel
+from barycorrpy.PINT_erfautils import get_iers_tab
 from barycorrpy.utils import get_stellar_data
 import numpy as np
 from astropy.time import Time
@@ -98,6 +99,11 @@ class Barycorrpy_tests(unittest.TestCase):
         self.assertTrue(np.isclose(a=star['pmdec'], b=769.465,   atol=1e-1, rtol=0))
         self.assertTrue(np.isclose(a=star['px'],    b=768.0665,  atol=1e-1, rtol=0))
 
+    def test_0_iers_tab(self):
+        # Assert the download happened. Also serves as a warmup for the cache.
+        tab = get_iers_tab()
+        for col in ('MJD', 'dX_2000A', 'dY_2000A', 'PM_x', 'PM_y'):
+            self.assertIn(col, tab.colnames)
 
 def main():
     unittest.main()
