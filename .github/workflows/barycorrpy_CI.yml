@@ -42,7 +42,7 @@ jobs:
         # test run hits the cache instead of timing out on the network.
         run: |
           for i in 1 2 3; do
-            python -c "from astropy.utils.iers import IERS_B_URL; from astropy.utils.data import download_file; download_file(IERS_B_URL, cache=True)" && break
+            python -c "from astropy.utils.iers import IERS_B_URL; from astropy.utils.data import download_file; download_file(IERS_B_URL, cache=True, timeout=180)" && break
             echo "IERS-B download attempt $i failed, retrying..."
             sleep 10
           done
