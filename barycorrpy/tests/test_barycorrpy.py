@@ -1,5 +1,7 @@
 import unittest
 from barycorrpy import get_BC_vel , exposure_meter_BC_vel
+from barycorrpy.PINT_erfautils import get_iers_tab
+from barycorrpy.utils import get_stellar_data
 import numpy as np
 from astropy.time import Time
 from barycorrpy import utc_tdb
@@ -87,7 +89,21 @@ class Barycorrpy_tests(unittest.TestCase):
         result7 = utc_tdb.JDUTC_to_HJDTDB(JDUTC=2458000, obsname='KPNO')
         self.assertTrue(np.isclose(a=result7[0], b=2457999.99497543, atol=1e-7, rtol=0))
 
+    def test_get_stellar_data(self):
+        # Regression test for issue #59: compatibility with astroquery.simbad field names
+        star, warning = get_stellar_data('Proxima Centauri')
 
+        self.assertTrue(np.isclose(a=star['ra'],    b=217.42894, atol=1e-3, rtol=0))
+        self.assertTrue(np.isclose(a=star['dec'],   b=-62.67949, atol=1e-3, rtol=0))
+        self.assertTrue(np.isclose(a=star['pmra'],  b=-3781.741, atol=1e-1, rtol=0))
+        self.assertTrue(np.isclose(a=star['pmdec'], b=769.465,   atol=1e-1, rtol=0))
+        self.assertTrue(np.isclose(a=star['px'],    b=768.0665,  atol=1e-1, rtol=0))
+
+    def test_0_iers_tab(self):
+        # Assert the download happened. Also serves as a warmup for the cache.
+        tab = get_iers_tab()
+        for col in ('MJD', 'dX_2000A', 'dY_2000A', 'PM_x', 'PM_y'):
+            self.assertIn(col, tab.colnames)
 
 def main():
     unittest.main()
