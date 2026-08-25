@@ -14,10 +14,9 @@ from .PhysicalConstants import *
 
 conf.auto_max_age=15
 
-iers_b_file = download_file(IERS_B_URL, cache=True)
-iers_b = IERS_B.open(iers_b_file)
-IERS.iers_table = iers_b
-iers_tab = IERS.iers_table
+# Global variable to hold the IERS table.
+# This is lazily loaded by get_iers_tab() and then cached here for future use.
+_iers_tab = None
 
 # Earth rotation rate in radians per UT1 second
 #
@@ -31,6 +30,19 @@ OM = 1.00273781191135448 * 2.0 * np.pi / SECS_PER_DAY
 # arcsec to radians
 asec2rad = np.pi/(180*3600)
 
+def get_iers_tab():
+    """
+    Get the IERS B table from astropy and set it as the default IERS table.
+
+    This lazy function avoids the table download at import time.
+    """
+    global _iers_tab
+    if _iers_tab is None:
+        iers_b_file = download_file(IERS_B_URL, cache=True)
+        iers_b = IERS_B.open(iers_b_file)
+        IERS.iers_table = iers_b
+        _iers_tab = IERS.iers_table
+    return _iers_tab
 
 def gcrs_posvel_from_itrf(loc, toas,tts):
     """Return a list of PosVel instances for the observatory at the TOA times.
@@ -70,7 +82,8 @@ def gcrs_posvel_from_itrf(loc, toas,tts):
             ttoas = toas
         N = len(ttoas)
 
-
+    # Get the IERS B table.
+    iers_tab = get_iers_tab()
 
     # Get various times from the TOAs as arrays
     #tts = np.asarray([(t.jd1, t.jd2) for t in ttoas.tt]).T

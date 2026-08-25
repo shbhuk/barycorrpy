@@ -13,6 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+        astroquery: [""]  # latest
+        include:
+          - python-version: "3.12"
+            astroquery: "==0.4.7" # legacy version, proven to work on 3.12
 
     steps:
       - uses: actions/checkout@v4
@@ -27,17 +31,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install .
           pip install pytest
+          pip install "astroquery${{ matrix.astroquery }}"
 
-      - name: Prime IERS-B cache
-        # barycorrpy downloads the IERS-B table at import time. Pre-populate
-        # astropy's download cache here (with retries) so the import during the
-        # test run hits the cache instead of timing out on the network.
-        run: |
-          for i in 1 2 3; do
-            python -c "from astropy.utils.iers import IERS_B_URL; from astropy.utils.data import download_file; download_file(IERS_B_URL, cache=True)" && break
-            echo "IERS-B download attempt $i failed, retrying..."
-            sleep 10
-          done
+      - name: Show astroquery version
+        run: python -c "import astroquery; print('astroquery', astroquery.__version__)"
 
       - name: Run tests
         run: pytest -v barycorrpy/tests
