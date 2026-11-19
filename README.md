@@ -5,7 +5,6 @@ To sign up for updates, please join the Google Group linked here -
 https://groups.google.com/g/barycorrpy
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115856.svg)](https://doi.org/10.5281/zenodo.1115856)
-[![Build Status](https://travis-ci.com/shbhuk/barycorrpy.svg?branch=master)](https://travis-ci.com/shbhuk/barycorrpy)
 [![PyPI version](https://badge.fury.io/py/barycorrpy.svg)](https://badge.fury.io/py/barycorrpy)
 [![ASCL:1808.001](https://img.shields.io/badge/ascl-1808.001-blue.svg?colorB=262255)](http://ascl.net/1808.001)
 <!-- [![PyPI downloads](https://img.shields.io/pypi/dm/barycorrpy.svg)](https://pypistats.org/packages/barycorrpy) -->
